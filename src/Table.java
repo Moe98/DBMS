@@ -59,7 +59,7 @@ public class Table {
 
 	}
 
-	public void deleteFromTable(Hashtable<String, Object> htblColNameValue) throws DBAppException {
+	public void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue) throws DBAppException {
 
 		/*
 		 * 
