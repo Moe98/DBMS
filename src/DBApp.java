@@ -231,7 +231,7 @@ public class DBApp {
 	public static void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException {
 		Table table = getTable(strTableName);
-		table.deleteFromTable(htblColNameValue);
+		table.deleteFromTable(strTableName, htblColNameValue);
 
 	}
 
