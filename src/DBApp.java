@@ -285,10 +285,10 @@ public class DBApp {
 			if (path.startsWith(strTableName)) {
 				last = path;
 				counter++;
-				System.out.println("Path: " + path);
+				// System.out.println("Path: " + path);
 				Vector<Object> v = getNumberOfTuples("pages/" + last);
 				Object[] o;
-				for (int i = 0; i < v.size(); i++) {
+				for (int i = 0; i < v.size();) {
 					o = (Object[]) (v.get(i));
 					boolean equals = true;
 					for (int j = 0; j < o.length; j++)
@@ -297,8 +297,8 @@ public class DBApp {
 					if (equals) {
 						// System.out.println("" + v.size() + " i:" + i);
 						v.remove(i);
-						i = 0;
-					}
+					} else
+						i++;
 					File deletedFile = new File("pages/" + last);
 					deletedFile.delete();
 					if (v.size() > 0) {
@@ -363,11 +363,11 @@ public class DBApp {
 		//
 		// htblColNameValue.put("id", new Integer(23498));
 		// htblColNameValue.put("name", new String("sasa"));
-		// htblColNameValue.put("gpa", new Double(1.5));
+		// htblColNameValue.put("gpa", new Double(1.25));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
 		//
-		readTables(strTableName);
+		// readTables(strTableName);
 		// System.out.println();
 		// System.out.println("after push down");
 		// System.out.println();
