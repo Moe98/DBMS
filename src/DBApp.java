@@ -329,7 +329,7 @@ public class DBApp {
 						// System.out.println((double) tuple[0]);
 						// System.out.println((String) tuple[1]);
 						// System.out.println((int) tuple[2]);
-						// v.set(i, tuple.clone());
+						v.set(i, tuple.clone());
 						// Object object[] = (Object[]) v.get(i);
 						// System.out.println((double) object[0]);
 						// System.out.println((String) object[1]);
