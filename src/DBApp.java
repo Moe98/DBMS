@@ -16,6 +16,38 @@ public class DBApp {
 		//
 	}
 
+	public static Table getTable(String strTableName) {
+		for (int i = 0; i < tables.size(); i++) {
+			if (tables.get(i).strTableName == strTableName)
+				return tables.get(i);
+		}
+		// method not implemented yet !!!
+		return null;
+	}
+
+	// try new method
+	public static void writeTable() throws IOException {
+
+		try {
+			FileOutputStream fileOut = new FileOutputStream("tables1");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(tables);
+			out.close();
+			fileOut.close();
+
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
+	}
+
+	public static void readTable() throws IOException, ClassNotFoundException {
+		FileInputStream fileIn = new FileInputStream("tables1");
+		ObjectInputStream in = new ObjectInputStream(fileIn);
+		tables = (ArrayList<Table>) in.readObject();
+		in.close();
+		fileIn.close();
+	}
+
 	public static ArrayList<Pair> search(String strTableName, Hashtable<String, Object> htblColNameValue) {
 		ArrayList<Pair> pageIndex = new ArrayList<>();
 		File file = new File("pages/");
@@ -61,10 +93,10 @@ public class DBApp {
 	//
 	// }
 
-	public static Table getTable(String strTableName) {
-		// method not implemented yet !!!
-		return null;
-	}
+	// public static Table getTable(String strTableName) {
+	// // method not implemented yet !!!
+	// return null;
+	// }
 
 	public static void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException, FileNotFoundException {
