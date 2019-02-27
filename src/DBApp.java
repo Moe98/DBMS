@@ -290,12 +290,70 @@ public class DBApp {
 	public static void updateTable(String strTableName, String strKey, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException {
 
-		Table table = getTable(strTableName);
-		table.updateTable(strKey, htblColNameValue);
+		// Table table = getTable(strTableName);
+		// table.updateTable(strKey, htblColNameValue);
 		/*
 		 * we cant just call delete then update
 		 */
-
+		File file = new File("pages/");
+		String[] paths = file.list();
+		int counter = 0;
+		String last = null;
+		Object[] tuple = new Object[htblColNameValue.size()];
+		int idx = 0;
+		int idxStrKey = 0;
+		for (String colName : htblColNameValue.keySet()) {
+			Object value = htblColNameValue.get(colName);
+			if (colName == strKey)
+				idxStrKey = idx;
+			tuple[idx++] = value;
+		}
+		for (String path : paths) {
+			if (path.startsWith(strTableName)) {
+				last = path;
+				counter++;
+				// System.out.println("Path: " + path);
+				Vector<Object> v = getNumberOfTuples("pages/" + last);
+				Object[] o;
+				for (int i = 0; i < v.size(); i++) {
+					o = (Object[]) (v.get(i));
+					boolean equals = false;
+					// for (int j = 0; j < o.length; j++)
+					// if (!o[j].equals(tuple[j]) && !(tuple[j] instanceof String &&
+					// tuple[j].equals(deprecated)))
+					// equals = false;
+					if (tuple[idxStrKey].equals(o[idxStrKey]))
+						equals = true;
+					if (equals) {
+						// System.out.println("" + v.size() + " i:" + i);
+						// System.out.println((double) tuple[0]);
+						// System.out.println((String) tuple[1]);
+						// System.out.println((int) tuple[2]);
+						// v.set(i, tuple.clone());
+						// Object object[] = (Object[]) v.get(i);
+						// System.out.println((double) object[0]);
+						// System.out.println((String) object[1]);
+						// System.out.println((int) object[2]);
+						// v.remove(i);
+					}
+					// else
+					// i++;
+					File deletedFile = new File("pages/" + last);
+					deletedFile.delete();
+					if (v.size() > 0) {
+						try {
+							FileOutputStream fileOut = new FileOutputStream("pages/" + last);
+							ObjectOutputStream out = new ObjectOutputStream(fileOut);
+							out.writeObject(v);
+							out.close();
+							fileOut.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public static void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue)
@@ -380,58 +438,68 @@ public class DBApp {
 		// htblColNameValue.put("gpa", new Double(1.5));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
-		//
+		//////////////////////////////////////////////////////
 		// htblColNameValue.put("id", new Integer(23498));
 		// htblColNameValue.put("name", new String("bod da"));
 		// htblColNameValue.put("gpa", new Double(1.5));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
-		//
+		//////////////////////////////////////////////////////
 		// htblColNameValue.put("id", new Integer(23498));
 		// htblColNameValue.put("name", new String("lolo"));
 		// htblColNameValue.put("gpa", new Double(1.5));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
-		//
-		// htblColNameValue.put("id", new Integer(23498));
+		//////////////////////////////////////////////////////
+		// htblColNameValue.put("id", new Integer(13));
 		// htblColNameValue.put("name", new String("sasa"));
 		// htblColNameValue.put("gpa", new Double(1.25));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
-		//
 		// readTables(strTableName);
+		//////////////////////////////////////////////////////
 		// System.out.println();
 		// System.out.println("after push down");
 		// System.out.println();
-
+		//////////////////////////////////////////////////////
 		// htblColNameValue.put("id", new Integer(23498));
 		// htblColNameValue.put("name", new String("Joe here"));
 		// htblColNameValue.put("gpa", null);
-
+		//////////////////////////////////////////////////////
 		// pushDown(5, strTableName, htblColNameValue);
 		// // readTables(strTableName);
 		// htblColNameValue.clear();
+		//////////////////////////////////////////////////////
 		// Hashtable hashTable = new Hashtable();
 		// hashTable.put("id", new Integer(133));
 		// hashTable.put("name", deprecated);
 		// hashTable.put("gpa", deprecated);
 		// System.out.println(deprecated instanceof String);
-		htblColNameValue.put("id", deprecated);
-		htblColNameValue.put("name", deprecated);
-		htblColNameValue.put("gpa", new Double(1.5));
-		deleteFromTable(strTableName, htblColNameValue);
-		htblColNameType.clear();
-		readTables(strTableName);
+		// htblColNameValue.put("id", deprecated);
+		// htblColNameValue.put("name", deprecated);
+		// htblColNameValue.put("gpa", new Double(1.5));
+		// deleteFromTable(strTableName, htblColNameValue);
 		// htblColNameType.clear();
+		// readTables(strTableName);
+		// htblColNameType.clear();
+		//////////////////////////////////////////////////////
 		// System.out.println(search(strTableName, hashTable).toString());
 		// hashTable.clear();
+		//////////////////////////////////////////////////////
 		// hashTable.put("id", new Integer(23498));
 		// hashTable.put("name", new String("sasa"));
 		// hashTable.put("gpa", new Double(1.5));
 		// deleteFromTable(strTableName, hashTable);
 		// hashTable.clear();
 		// readTables(strTableName);
-
+		/////////////////////////////////////////////////////
+		htblColNameValue.put("id", new Integer(7));
+		htblColNameValue.put("name", new String("Moe"));
+		htblColNameValue.put("gpa", new Double(2.3));
+		updateTable(strTableName, "id", htblColNameValue);
+		htblColNameValue.clear();
+		readTables(strTableName);
+		//////////////////////////////////////////////////////
 	}
 
 	static class Pair {
