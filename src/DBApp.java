@@ -70,7 +70,6 @@ public class DBApp {
 					o = (Object[]) (v.get(i));
 					boolean equals = true;
 					for (int j = 0; j < o.length && j < tuple.length; j++) {
-						// System.out.println(o[j] instanceof String);
 						if (!o[j].equals(tuple[j]) && !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
 							equals = false;
 					}
@@ -100,8 +99,6 @@ public class DBApp {
 
 	public static void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException, FileNotFoundException {
-		// Table table=getTable(strTableName);
-		// table.insertIntoTable(htblColNameValue);
 		Object[] tuple = new Object[htblColNameValue.size()];
 		int idx = 0;
 		for (String colName : htblColNameValue.keySet()) {
@@ -289,55 +286,79 @@ public class DBApp {
 
 	public static void updateTable(String strTableName, String strKey, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException {
-
-		// Table table = getTable(strTableName);
-		// table.updateTable(strKey, htblColNameValue);
-		/*
-		 * we cant just call delete then update
-		 */
 		File file = new File("pages/");
 		String[] paths = file.list();
 		int counter = 0;
 		String last = null;
 		Object[] tuple = new Object[htblColNameValue.size()];
 		int idx = 0;
-		int idxStrKey = 0;
+		int idxStrKey = -1;
 		for (String colName : htblColNameValue.keySet()) {
 			Object value = htblColNameValue.get(colName);
-			if (colName == strKey)
-				idxStrKey = idx;
+			// if (colName == strKey)
+			// idxStrKey = idx;
 			tuple[idx++] = value;
 		}
+		String col;
+		String metaFile = "meta.csv";
+		File meta = new File(metaFile);
+		boolean found = false;
+		try {
+			Scanner sc = new Scanner(meta);
+			while (sc.hasNext() && !found) {
+				String data = sc.nextLine();
+				// System.out.println(data);
+				if (data.startsWith(strTableName)) {
+					// System.out.println(data.split(", ")[3]);
+					idxStrKey++;
+					// System.out.println(idxStrKey);
+					if ((data.split(", ")[3]).equals("True")) {
+						// col = data.split(", ")[1];
+						found = true;
+						break;
+					}
+				}
+			}
+			sc.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		// System.out.println(idxStrKey);
 		for (String path : paths) {
 			if (path.startsWith(strTableName)) {
 				last = path;
 				counter++;
-				// System.out.println("Path: " + path);
 				Vector<Object> v = getNumberOfTuples("pages/" + last);
 				Object[] o;
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
+					// System.out.println((int) o[2]);
 					boolean equals = false;
-					// for (int j = 0; j < o.length; j++)
-					// if (!o[j].equals(tuple[j]) && !(tuple[j] instanceof String &&
-					// tuple[j].equals(deprecated)))
-					// equals = false;
-					if (tuple[idxStrKey].equals(o[idxStrKey]))
-						equals = true;
-					if (equals) {
-						// System.out.println("" + v.size() + " i:" + i);
-						// System.out.println((double) tuple[0]);
-						// System.out.println((String) tuple[1]);
-						// System.out.println((int) tuple[2]);
-						v.set(i, tuple.clone());
-						// Object object[] = (Object[]) v.get(i);
-						// System.out.println((double) object[0]);
-						// System.out.println((String) object[1]);
-						// System.out.println((int) object[2]);
-						// v.remove(i);
+					// System.out.println(o[idxStrKey].equals(strKey));
+					if (o[idxStrKey] instanceof String) {
+						equals = ((String) (o[idxStrKey])).equals(strKey);
 					}
-					// else
-					// i++;
+					if (o[idxStrKey] instanceof Double) {
+						equals = ((Double) o[idxStrKey]) == Double.parseDouble(strKey);
+						// type = "double";
+					}
+					if (o[idxStrKey] instanceof Integer) {
+						equals = ((Integer) o[idxStrKey]) == Integer.parseInt(strKey);
+						// System.out.println("in here" + " " + equals);
+						// type = "integer";
+					}
+					if (o[idxStrKey] instanceof Boolean) {
+						equals = ((Boolean) o[idxStrKey]) == Boolean.parseBoolean(strKey);
+						// type = "boolean";
+					}
+					if (o[idxStrKey] instanceof Date) {
+						equals = ((String) o[idxStrKey]).equals(strKey);
+						// type = "date";
+					}
+					// if (o[idxStrKey].equals((Object) strKey))
+					// equals = true;
+					if (equals)
+						v.set(i, tuple.clone());
 					File deletedFile = new File("pages/" + last);
 					deletedFile.delete();
 					if (v.size() > 0) {
@@ -358,9 +379,6 @@ public class DBApp {
 
 	public static void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws DBAppException {
-		// Table table = getTable(strTableName);
-		// table.deleteFromTable(htblColNameValue);
-		// ArrayList<Pair> toBeDeleted = search(strTableName, htblColNameValue);
 		File file = new File("pages/");
 		String[] paths = file.list();
 		int counter = 0;
@@ -375,7 +393,6 @@ public class DBApp {
 			if (path.startsWith(strTableName)) {
 				last = path;
 				counter++;
-				// System.out.println("Path: " + path);
 				Vector<Object> v = getNumberOfTuples("pages/" + last);
 				Object[] o;
 				for (int i = 0; i < v.size();) {
@@ -384,10 +401,9 @@ public class DBApp {
 					for (int j = 0; j < o.length; j++)
 						if (!o[j].equals(tuple[j]) && !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
 							equals = false;
-					if (equals) {
-						// System.out.println("" + v.size() + " i:" + i);
+					if (equals)
 						v.remove(i);
-					} else
+					else
 						i++;
 					File deletedFile = new File("pages/" + last);
 					deletedFile.delete();
@@ -451,9 +467,9 @@ public class DBApp {
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
 		//////////////////////////////////////////////////////
-		// htblColNameValue.put("id", new Integer(13));
 		// htblColNameValue.put("name", new String("sasa"));
 		// htblColNameValue.put("gpa", new Double(1.25));
+		// htblColNameValue.put("id", new Integer(13));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
 		// readTables(strTableName);
@@ -493,10 +509,10 @@ public class DBApp {
 		// hashTable.clear();
 		// readTables(strTableName);
 		/////////////////////////////////////////////////////
-		htblColNameValue.put("id", new Integer(7));
-		htblColNameValue.put("name", new String("Moe"));
-		htblColNameValue.put("gpa", new Double(2.3));
-		updateTable(strTableName, "id", htblColNameValue);
+		htblColNameValue.put("id", new Integer(21));
+		htblColNameValue.put("name", new String("Joe"));
+		htblColNameValue.put("gpa", new Double(1.3));
+		updateTable(strTableName, "7", htblColNameValue);
 		htblColNameValue.clear();
 		readTables(strTableName);
 		//////////////////////////////////////////////////////
