@@ -76,3 +76,9 @@ Student, id, java.lang.Integer, True, False
 Student, gpa, java.lang.double, False, False
 Student, name, java.lang.String, False, False
 Student, id, java.lang.Integer, True, False
+Student, gpa, java.lang.double, False, False
+Student, name, java.lang.String, False, False
+Student, id, java.lang.Integer, True, False
+Student, gpa, java.lang.double, False, False
+Student, name, java.lang.String, False, False
+Student, id, java.lang.Integer, True, False
