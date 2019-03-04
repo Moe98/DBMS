@@ -1,4 +1,0 @@
-teamDB, gpa, java.lang.double, False, False
-teamDB, date, java.util.Date, False, False
-teamDB, name, java.lang.String, False, False
-teamDB, id, java.lang.Integer, True, False

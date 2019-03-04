@@ -9,6 +9,7 @@ public class DBApp {
 	static int maxTuplesPerPage = 5;
 	static ArrayList<Table> tables;
 	static String deprecated = "$";
+	static String nullEntry = "";
 
 	public static void init() {
 		tables = new ArrayList();
@@ -203,6 +204,7 @@ public class DBApp {
 		try (BufferedReader br = new BufferedReader(new FileReader("meta.csv"))) {
 			String line;
 			int co = 0;
+			int f = 0;
 			while ((line = br.readLine()) != null) {
 				String[] values = line.split(",");
 
@@ -210,6 +212,8 @@ public class DBApp {
 				if (values[0].equals(strTableName)) {
 					co++;
 					Object givenValue = htblColNameValue.get(values[1].substring(1));
+					if (givenValue == null)
+						continue;
 					if (values[2].substring(1).equals("java.lang.String"))
 						if (!(givenValue instanceof String))
 							throw new DBAppException();
@@ -226,11 +230,15 @@ public class DBApp {
 					if (values[2].substring(1).equals("java.util.Date"))
 						if (!(givenValue instanceof Date))
 							throw new DBAppException();
+					if (givenValue != null && values[3].substring(1).equals("True"))
+						f = 1;
 				}
 			}
 			// check entered values are full
 			co = insert ? co + 1 : co;
-			if (co != htblColNameValue.size())
+			// if (co != htblColNameValue.size())
+			// throw new DBAppException();
+			if (f == 0)
 				throw new DBAppException();
 		}
 	}
@@ -247,11 +255,25 @@ public class DBApp {
 
 	static Object[] getValueInOrder(String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws FileNotFoundException, IOException {
-		Object[] tuple = new Object[htblColNameValue.size()];
+
+		Object[] tuple;
 		try (BufferedReader br = new BufferedReader(new FileReader("meta.csv"))) {
 			String line;
 			int co = 0;
+			while ((line = br.readLine()) != null) {
+				String[] values = line.split(",");
 
+				// validate types
+				if (values[0].equals(strTableName)) {
+					co++;
+
+				}
+			}
+			tuple = new Object[Math.max(htblColNameValue.size(), co + 1)];
+		}
+		try (BufferedReader br = new BufferedReader(new FileReader("meta.csv"))) {
+			// int co = 0;
+			String line;
 			tuple[0] = htblColNameValue.get("TouchDate");
 			int idx = 1;
 
@@ -260,11 +282,18 @@ public class DBApp {
 
 				// validate types
 				if (values[0].equals(strTableName)) {
-					co++;
+
 					Object givenValue = htblColNameValue.get(values[1].substring(1));
+
 					tuple[idx++] = givenValue;
 				}
 			}
+			// System.out.println(Arrays.toString(tuple));
+			for (int i = 0; i < tuple.length; i++) {
+				if (tuple[i] == null)
+					tuple[i] = (Object) "empty cell";
+			}
+
 		}
 		return tuple;
 	}
@@ -629,7 +658,8 @@ public class DBApp {
 					// System.out.println("Index of: " + j + " Value: " + o[j].toString());
 					// System.out.println(o.length + " " + tuple.length);
 					for (int j = 1; j < o.length; j++)
-						if (!o[j].equals(tuple[j]) && !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
+						if (!(o[j] == null) && !o[j].equals(tuple[j])
+								&& !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
 							equals = false;
 					if (equals)
 						v.remove(i);
@@ -666,7 +696,7 @@ public class DBApp {
 
 		Hashtable htblColNameValue = new Hashtable();
 		// htblColNameValue.put("id", new Integer(2));
-		// htblColNameValue.put("name", new String("z"));
+		// // htblColNameValue.put("name", new String("z"));
 		// htblColNameValue.put("gpa", new Double(0.95));
 		// htblColNameValue.put("date", new Date(string));
 		// insertIntoTable(strTableName, htblColNameValue);
@@ -677,25 +707,26 @@ public class DBApp {
 		//////////////////////////////////////////
 		// string = "January 2, 2007";
 		// htblColNameValue.put("id", new Integer(1));
-		// htblColNameValue.put("name", new String("d"));
+		// // htblColNameValue.put("name", new String("d"));
 		// htblColNameValue.put("gpa", new Double(1.25));
 		// htblColNameValue.put("date", new Date(string));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
 		//////////////////////////////////////////////////////
 		// string = "January 2, 2006";
-		// htblColNameValue.put("name", new String("c"));
+		// // htblColNameValue.put("name", new String("c"));
 		// htblColNameValue.put("date", new Date(string));
-		// htblColNameValue.put("id", new Integer(7));
+		// htblColNameValue.put("id", new Integer(11));
 		// // htblColNameValue.put("name", new String("c"));
 		// htblColNameValue.put("gpa", new Double(1.5));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
+		// readTables(strTableName);
 		////////////////////////////////////////////////
 		// string = "January 2, 2006";
 		// htblColNameValue.put("id", new Integer(7));
-		// htblColNameValue.put("name", new String("c"));
-		// htblColNameValue.put("gpa", new Double(1.5));
+		// // htblColNameValue.put("name", new String("c"));
+		// // htblColNameValue.put("gpa", new Double(1.5));
 		// htblColNameValue.put("date", new Date(string));
 		// insertIntoTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
@@ -747,16 +778,16 @@ public class DBApp {
 
 		///////////////////////////////////////////////////
 		string = "January 2, 1999";
-		htblColNameValue.put("id", new Integer(10));
-		htblColNameValue.put("name", new String("abcdefg"));
+		htblColNameValue.put("id", new Integer(3));
+		// htblColNameValue.put("name", new String("abcdefg"));
 		htblColNameValue.put("gpa", new Double(4.4255));
 		htblColNameValue.put("date", new Date(string));
-		updateTable(strTableName, "2", htblColNameValue);
+		updateTable(strTableName, "6", htblColNameValue);
 		htblColNameValue.clear();
 		readTables(strTableName);
 		// System.out.println(new Date(System.currentTimeMillis()));
 		///////////////////////////////////////////////////
-		// htblColNameValue.put("id", new Integer(321));
+		// htblColNameValue.put("id", new Integer(11));
 		// htblColNameValue.put("name", deprecated);
 		// htblColNameValue.put("gpa", deprecated);
 		// htblColNameValue.put("date", deprecated);
