@@ -270,8 +270,80 @@ public class DBApp {
 		return tuple;
 	}
 
+
 	static void pushDown(int where, String strTableName, Hashtable<String, Object> htblColNameValue)
 			throws FileNotFoundException, IOException {
+
+	
+	static int getIndex(String strTableName, Hashtable<String, Object> htblColNameValue) {
+		String fileNameDefined = "meta.csv";
+		int whichClusCol = 0;
+		File meta = new File(fileNameDefined);
+		try {
+			Scanner inputStream = new Scanner(meta);
+			while (inputStream.hasNextLine()) {
+				String data = inputStream.nextLine();
+				if (data.startsWith(strTableName)) {
+					if ((data.split(", ")[3]).equals("False")) {
+						whichClusCol++;
+					}else{
+						break;
+					}
+				}
+			}
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		int index = 0;
+		File file = new File("pages/");
+		String[] paths = file.list();
+		String last = null;
+		Object[] tuple = new Object[htblColNameValue.size()];
+		int idx = 0;
+		for (String colName : htblColNameValue.keySet()) {
+			Object value = htblColNameValue.get(colName);
+			tuple[idx++] = value;
+		}
+		for (String path : paths) {
+			if (path.startsWith(strTableName)) {
+				last = path;
+				Vector<Object> v = getNumberOfTuples("pages/" + last);
+				Object[] o;
+				for (int i = 0; i < v.size(); i++) {
+					o = (Object[]) (v.get(i));
+					if (o[whichClusCol] instanceof java.lang.Integer) {
+						if (((Integer) o[whichClusCol]) >= ((Integer) tuple[whichClusCol])) {
+							return index;
+						}
+					} else {
+						if (o[whichClusCol] instanceof java.lang.String) {
+							if (((String) o[whichClusCol]).compareTo((String) tuple[whichClusCol]) >= 0) {
+								return index;
+							}
+						} else {
+							if (o[whichClusCol] instanceof java.lang.Double) {
+								if (((Double) o[whichClusCol]).compareTo((Double) tuple[whichClusCol]) >= 0) {
+									return index;
+								}
+							} else {
+								if (o[whichClusCol] instanceof Date) {
+									if (((Date) o[whichClusCol]).compareTo((Date) tuple[whichClusCol]) >= 0) {
+										return index;
+									}
+								}
+							}
+						}
+					}
+					index++;
+				}
+			}
+		}
+		return index;
+	}
+	
+	static void pushDown(int where, String strTableName, Hashtable<String, Object> htblColNameValue) {
+
 		where--;
 		Object[] tuple = new Object[htblColNameValue.size()];
 		int pushed = 0;
