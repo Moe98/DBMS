@@ -1569,12 +1569,8 @@ public class DBApp {
 		// htblColNameValue.clear();
 		// System.out.println(EQUALNONINDEXED(strTableName, "name", "abcdefg"));
 		// readTables(strTableName);
-		
-		
-		
-		
 		createBitmapIndex("teamDB", "gpa");
-		 readTables("teamDB");
+		readTables("teamDB");
 	}
 
 	static class Pair {
@@ -1591,19 +1587,7 @@ public class DBApp {
 		}
 	}
 
-	static class BitmapPair implements Serializable {
-		String value, bitmap;
-
-		BitmapPair(String a, String b) {
-			value = a;
-			bitmap = b;
-		}
-
-		public String toString() {
-			return "Value: " + value + " Bitmap: " + bitmap + '\n';
-		}
-	}
-	public static Bitmap createBitmapIndex(String tableName,String colName) throws IOException {
-		return new Bitmap(tableName,colName);
+	public static Bitmap createBitmapIndex(String tableName, String colName) throws IOException {
+		return new Bitmap(tableName, colName);
 	}
 }
