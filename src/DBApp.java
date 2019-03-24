@@ -947,6 +947,12 @@ public class DBApp {
 		// deleteFromTable(strTableName, htblColNameValue);
 		// htblColNameValue.clear();
 		// readTables(strTableName);
+		
+		
+		
+		
+		createBitmapIndex("teamDB", "gpa");
+		 readTables("teamDB");
 	}
 
 	static class Pair {
@@ -974,5 +980,8 @@ public class DBApp {
 		public String toString() {
 			return "Value: " + value + " Bitmap: " + bitmap + '\n';
 		}
+	}
+	public static Bitmap createBitmapIndex(String tableName,String colName) throws IOException {
+		return new Bitmap(tableName,colName);
 	}
 }
