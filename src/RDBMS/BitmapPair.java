@@ -1,3 +1,4 @@
+package RDBMS;
 import java.io.Serializable;
 
 public class BitmapPair implements Serializable {

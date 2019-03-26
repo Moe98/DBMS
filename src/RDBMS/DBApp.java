@@ -1,3 +1,5 @@
+package RDBMS;
+
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -8,8 +10,8 @@ public class DBApp {
 
 	static int maxTuplesPerPage = 5;
 	static ArrayList<Table> tables;
-	static String deprecated = "$";
-	static String nullEntry = "";
+	static String deprecated = "empty cell";
+	static String nullEntry = "empty cell";
 
 	public static void init() {
 		tables = new ArrayList();
@@ -167,6 +169,11 @@ public class DBApp {
 									return index;
 								}
 							} else {
+								// change date type here
+								//
+								//
+								//
+								//
 								if (o[whichClusCol] instanceof Date) {
 									if (((Date) o[whichClusCol]).compareTo((Date) tuple[whichClusCol]) >= 0) {
 										return index;
@@ -229,11 +236,12 @@ public class DBApp {
 	}
 
 	public static void insertIntoTable(String strTableName, Hashtable<String, Object> htblColNameValue)
-			throws DBAppException, IOException {
+			throws DBAppException, IOException, ParseException, ClassNotFoundException {
 		htblColNameValue.put("TouchDate", new Date(System.currentTimeMillis()));
 		validateEntry(strTableName, htblColNameValue, true);
 		int p1 = getIndex(strTableName, htblColNameValue);
 		pushDown(p1 + 1, strTableName, htblColNameValue);
+		Bitmap.updateOnInsert(p1, "teamDB", htblColNameValue);
 	}
 
 	static Object[] getValueInOrder(String strTableName, Hashtable<String, Object> htblColNameValue)
@@ -359,7 +367,7 @@ public class DBApp {
 
 	}
 
-	static String[] sortPaths(String[] paths) {
+	public static String[] sortPaths(String[] paths) {
 		for (int i = 0; i < paths.length - 1; i++) {
 			for (int j = i + 1; j < paths.length; j++) {
 				StringTokenizer st = new StringTokenizer(paths[i], "_");
@@ -383,7 +391,7 @@ public class DBApp {
 		return paths;
 	}
 
-	static void readTables(String strTableName) {
+	public static void readTables(String strTableName) {
 		File file = new File("pages/");
 		String[] paths = file.list();
 		int counter = 0;
@@ -426,161 +434,179 @@ public class DBApp {
 		}
 	}
 
-	public static void updateTable(String strTableName, String strKey, Hashtable<String, Object> htblColNameValue)
-			throws DBAppException, FileNotFoundException, IOException {
-		validateEntry(strTableName, htblColNameValue, false);
-		File file = new File("pages/");
-		int counter = 0;
-		String last = null;
-		Object[] tuple = new Object[htblColNameValue.size() + 1];
-		int idx = 1;
-		int idxStrKey = 0;
-		String col;
-		String metaFile = "meta.csv";
-		File meta = new File(metaFile);
-		boolean found = false;
-		try {
-			Scanner sc = new Scanner(meta);
-			while (sc.hasNext() && !found) {
-				String data = sc.nextLine();
-				String x[] = data.split("_");
-				if (x[0].startsWith(strTableName)) {
-					idxStrKey++;
-					if ((data.split(", ")[3]).equals("True")) {
-						found = true;
-						break;
-					}
-				}
-			}
-			sc.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		ArrayList<Object> updatedObjects = new ArrayList<>();
-		int count = 0;
-		while (true) {
-			boolean tupleFound = false;
-			String[] paths = sortPaths(file.list());
-			for (int j = 0; j < paths.length; j++) {
-				// paths = sortPaths(file.list());
-				String[] x = paths[j].split("_");
-				if (x[0].equals(strTableName)) {
-					last = paths[j];
-					counter++;
-					Vector<Object> v = getNumberOfTuples("pages/" + last);
-					Object[] o;
-					int prevJ = j == 0 ? j : j - 1;
-					for (int i = 0; i < v.size();) {
-						o = (Object[]) (v.get(i));
-						boolean equals = false;
-						if (o[idxStrKey] instanceof String)
-							equals = ((String) (o[idxStrKey])).equals(strKey);
-						if (o[idxStrKey] instanceof Double)
-							equals = ((Double) o[idxStrKey]) == Double.parseDouble(strKey);
-						if (o[idxStrKey] instanceof Integer)
-							equals = ((Integer) o[idxStrKey]) == Integer.parseInt(strKey);
-						if (o[idxStrKey] instanceof Boolean)
-							equals = ((Boolean) o[idxStrKey]) == Boolean.parseBoolean(strKey);
-						if (o[idxStrKey] instanceof Date)
-							equals = ((Date) o[idxStrKey]).equals(new Date(strKey));
-						if (updatedObjects.contains(v.get(i)))
-							continue;
-						if (equals) {
-							// updatedObjects.add(v.get(i));
-							htblColNameValue.put("TouchDate", new Date(System.currentTimeMillis()));
-							tuple = getValueInOrder(strTableName, htblColNameValue);
-							v.remove(i);
-							count++;
-							// j = j == 0 ? j : j - 1;
-							j = 0;
-							i = 0;
-							tupleFound = true;
-						} else
-							i++;
-						File deletedFile = new File("pages/" + last);
-						deletedFile.delete();
-						if (v.size() > 0) {
-							try {
-								FileOutputStream fileOut = new FileOutputStream("pages/" + last);
-								ObjectOutputStream out = new ObjectOutputStream(fileOut);
-								out.writeObject(v);
-								out.close();
-								fileOut.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						// if (equals) {
-						// insertIntoTable(strTableName, htblColNameValue);
-						// }
-						if (i == 0 && j == 0 && equals)
-							break;
-					}
-				}
-				paths = sortPaths(file.list());
-				if (j == paths.length)
-					j = 0;
-			}
-			if (!tupleFound)
-				break;
-		}
-		for (int i = 0; i < count; i++)
-			insertIntoTable(strTableName, htblColNameValue);
-	}
+	// public static void updateTable(String strTableName, String strKey,
+	// Hashtable<String, Object> htblColNameValue)
+	// throws DBAppException, FileNotFoundException, IOException, ParseException {
+	// validateEntry(strTableName, htblColNameValue, false);
+	// File file = new File("pages/");
+	// int counter = 0;
+	// String last = null;
+	// Object[] tuple = new Object[htblColNameValue.size() + 1];
+	// int idx = 1;
+	// int idxStrKey = 0;
+	// String col;
+	// String metaFile = "meta.csv";
+	// File meta = new File(metaFile);
+	// boolean found = false;
+	// try {
+	// Scanner sc = new Scanner(meta);
+	// while (sc.hasNext() && !found) {
+	// String data = sc.nextLine();
+	// String x[] = data.split("_");
+	// if (x[0].startsWith(strTableName)) {
+	// idxStrKey++;
+	// if ((data.split(", ")[3]).equals("True")) {
+	// found = true;
+	// break;
+	// }
+	// }
+	// }
+	// sc.close();
+	// } catch (FileNotFoundException e) {
+	// e.printStackTrace();
+	// }
+	// ArrayList<Object> updatedObjects = new ArrayList<>();
+	// int count = 0;
+	// while (true) {
+	// boolean tupleFound = false;
+	// String[] paths = sortPaths(file.list());
+	// for (int j = 0; j < paths.length; j++) {
+	// // paths = sortPaths(file.list());
+	// String[] x = paths[j].split("_");
+	// if (x[0].equals(strTableName)) {
+	// last = paths[j];
+	// counter++;
+	// Vector<Object> v = getNumberOfTuples("pages/" + last);
+	// Object[] o;
+	// int prevJ = j == 0 ? j : j - 1;
+	// for (int i = 0; i < v.size();) {
+	// o = (Object[]) (v.get(i));
+	// boolean equals = false;
+	// if (o[idxStrKey] instanceof String)
+	// equals = ((String) (o[idxStrKey])).equals(strKey);
+	// if (o[idxStrKey] instanceof Double)
+	// equals = ((Double) o[idxStrKey]) == Double.parseDouble(strKey);
+	// if (o[idxStrKey] instanceof Integer)
+	// equals = ((Integer) o[idxStrKey]) == Integer.parseInt(strKey);
+	// if (o[idxStrKey] instanceof Boolean)
+	// equals = ((Boolean) o[idxStrKey]) == Boolean.parseBoolean(strKey);
+	// if (o[idxStrKey] instanceof Date) {
+	// SimpleDateFormat dateFromat = new SimpleDateFormat("E MMM dd HH:mm:ss");
+	// // System.out.println(dateFromat.parse("Fri Jan 02 00:00:00 EET 2009"));
+	//
+	// equals = ((Date) o[idxStrKey]).equals(dateFromat.parse(strKey));
+	// }
+	// if (updatedObjects.contains(v.get(i)))
+	// continue;
+	// if (equals) {
+	// // updatedObjects.add(v.get(i));
+	// htblColNameValue.put("TouchDate", new Date(System.currentTimeMillis()));
+	// tuple = getValueInOrder(strTableName, htblColNameValue);
+	// v.remove(i);
+	// count++;
+	// // j = j == 0 ? j : j - 1;
+	// j = 0;
+	// i = 0;
+	// tupleFound = true;
+	// } else
+	// i++;
+	// File deletedFile = new File("pages/" + last);
+	// deletedFile.delete();
+	// if (v.size() > 0) {
+	// try {
+	// FileOutputStream fileOut = new FileOutputStream("pages/" + last);
+	// ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	// out.writeObject(v);
+	// out.close();
+	// fileOut.close();
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// // if (equals) {
+	// // insertIntoTable(strTableName, htblColNameValue);
+	// // }
+	// if (i == 0 && j == 0 && equals)
+	// break;
+	// }
+	// }
+	// paths = sortPaths(file.list());
+	// if (j == paths.length)
+	// j = 0;
+	// }
+	// if (!tupleFound)
+	// break;
+	// }
+	// for (int i = 0; i < count; i++)
+	// insertIntoTable(strTableName, htblColNameValue);
+	// }
 
-	public static void deleteFromTable(String strTableName, Hashtable<String, Object> htblColNameValue)
-			throws DBAppException, FileNotFoundException, IOException {
-		File file = new File("pages/");
-		String[] paths = sortPaths(file.list());
-		int counter = 0;
-		String last = null;
-		Object[] tuple = new Object[htblColNameValue.size()];
-		int idx = 0;
-		htblColNameValue.put("TouchDate", new Date(System.currentTimeMillis()));
-		tuple = getValueInOrder(strTableName, htblColNameValue);
-		for (int jj = 0; jj < paths.length; jj++) {
-			String[] x = paths[jj].split("_");
-			if (x[0].equals(strTableName)) {
-				last = paths[jj];
-				counter++;
-				Vector<Object> v = getNumberOfTuples("pages/" + last);
-				Object[] o;
-				for (int i = 0; i < v.size();) {
-					o = (Object[]) (v.get(i));
-					boolean equals = true;
-					for (int j = 1; j < o.length; j++)
-						if (!(o[j] == null) && !o[j].equals(tuple[j])
-								&& !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
-							equals = false;
-					if (equals)
-						v.remove(i);
-					else
-						i++;
-					File deletedFile = new File("pages/" + last);
-					deletedFile.delete();
-					if (v.size() > 0) {
-						try {
-							FileOutputStream fileOut = new FileOutputStream("pages/" + last);
-							ObjectOutputStream out = new ObjectOutputStream(fileOut);
-							out.writeObject(v);
-							out.close();
-							fileOut.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		}
-	}
+	// public static void deleteFromTable(String strTableName, Hashtable<String,
+	// Object> htblColNameValue)
+	// throws DBAppException, FileNotFoundException, IOException {
+	// File file = new File("pages/");
+	// String[] paths = sortPaths(file.list());
+	// int counter = 0;
+	// String last = null;
+	// Object[] tuple = new Object[htblColNameValue.size()];
+	// int idx = 0;
+	// htblColNameValue.put("TouchDate", new Date(System.currentTimeMillis()));
+	// tuple = getValueInOrder(strTableName, htblColNameValue);
+	// for (int jj = 0; jj < paths.length; jj++) {
+	// String[] x = paths[jj].split("_");
+	// if (x[0].equals(strTableName)) {
+	// last = paths[jj];
+	// counter++;
+	// Vector<Object> v = getNumberOfTuples("pages/" + last);
+	// Object[] o;
+	// for (int i = 0; i < v.size(); counter++) {
+	// o = (Object[]) (v.get(i));
+	// boolean equals = true;
+	// for (int j = 1; j < o.length; j++)
+	// if (!(o[j] == null) && !o[j].equals(tuple[j])
+	// && !(tuple[j] instanceof String && tuple[j].equals(deprecated)))
+	// equals = false;
+	// if (equals) {
+	// v.remove(i);
+	// Bitmap.updateOnDelete(counter--, strTableName);
+	// } else
+	// i++;
+	// File deletedFile = new File("pages/" + last);
+	// deletedFile.delete();
+	// if (v.size() > 0) {
+	// try {
+	// FileOutputStream fileOut = new FileOutputStream("pages/" + last);
+	// ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	// out.writeObject(v);
+	// out.close();
+	// fileOut.close();
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
 	////////////////////////////////////////////////////////////////////////////
 	///////////////////////////// END OF MILESTONE 1////////////////////////////
 	////////////////////////////////////////////////////////////////////////////
 
 	public static String retrieveBitmapIndex(String strTableName, String strColumnName, String strColumnValue) {
-		String startsWithFolderName = strTableName + strColumnName + "index";
+		// CHANGE TO NEW NAMING CONVENTION
+		//
+		///
+		//
+		//
+		///
+		///
+		///
+		///
+		String startsWithFolderName = strTableName + "_" + strColumnName + "_" + "index";
 		File file = new File("bitmaps/");
 		String[] paths = file.list();
+		// for (int i = 0; i < paths.length; i++)
+		// System.out.println(paths[i]);
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
 				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
@@ -655,7 +681,7 @@ public class DBApp {
 
 	public static String GREATERTHAN(String strTableName, String strColumnName, String strColumnValue) {
 		String result = "";
-		String startsWithFolderName = strTableName + strColumnName + "index";
+		String startsWithFolderName = strTableName + "_" + strColumnName + "_" + "index";
 		File file = new File("bitmaps/");
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
@@ -687,7 +713,7 @@ public class DBApp {
 
 	public static String GREATERTHANOREQUAL(String strTableName, String strColumnName, String strColumnValue) {
 		String result = "";
-		String startsWithFolderName = strTableName + strColumnName + "index";
+		String startsWithFolderName = strTableName + "_" + strColumnName + "_" + "index";
 		File file = new File("bitmaps/");
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
@@ -714,7 +740,7 @@ public class DBApp {
 
 	public static String LESSTHAN(String strTableName, String strColumnName, String strColumnValue) {
 		String result = "";
-		String startsWithFolderName = strTableName + strColumnName + "index";
+		String startsWithFolderName = strTableName + "_" + strColumnName + "_" + "index";
 		File file = new File("bitmaps/");
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
@@ -741,7 +767,7 @@ public class DBApp {
 
 	public static String LESSTHANOREQUAL(String strTableName, String strColumnName, String strColumnValue) {
 		String result = "";
-		String startsWithFolderName = strTableName + strColumnName + "index";
+		String startsWithFolderName = strTableName + "_" + strColumnName + "_" + "index";
 		File file = new File("bitmaps/");
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
@@ -793,7 +819,8 @@ public class DBApp {
 		return result;
 	}
 
-	public static String LESSTHANOREQUALNONINDEXED(String strTableName, String strColumnName, String strColumnValue) {
+	public static String LESSTHANOREQUALNONINDEXED(String strTableName, String strColumnName, String strColumnValue)
+			throws ParseException {
 		// use .toLowerCase()
 		File file = new File("pages/");
 		String[] paths = file.list();
@@ -847,6 +874,11 @@ public class DBApp {
 				Object[] o;
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
+					if (o[idxStrKey].toString().equals("empty cell")) {
+						result.append(0);
+						continue;
+					}
+					// System.out.println("in here");
 					if (stringType || booleanType) {
 						String objString = (String) o[idxStrKey];
 						String valString = (String) strColumnValue;
@@ -855,8 +887,12 @@ public class DBApp {
 						else
 							result.append(0);
 					} else if (dateType) {
+						// System.out.println(o[idxStrKey].toString());
 						Date objDate = (Date) o[idxStrKey];
-						Date valDate = new Date(strColumnValue);
+						// System.out.println(dateFormat.parse("Fri Jan 02 00:00:00 EET 2009"));
+						SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date valDate = dateFormat.parse(strColumnValue);
 						if (objDate.compareTo(valDate) <= 0)
 							result.append(1);
 						else
@@ -883,7 +919,8 @@ public class DBApp {
 		return result.toString();
 	}
 
-	public static String LESSTHANNONINDEXED(String strTableName, String strColumnName, String strColumnValue) {
+	public static String LESSTHANNONINDEXED(String strTableName, String strColumnName, String strColumnValue)
+			throws ParseException {
 		// use .toLowerCase()
 		File file = new File("pages/");
 		String[] paths = file.list();
@@ -937,6 +974,10 @@ public class DBApp {
 				Object[] o;
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
+					if (o[idxStrKey].toString().equals("empty cell")) {
+						result.append(0);
+						continue;
+					}
 					if (stringType || booleanType) {
 						String objString = (String) o[idxStrKey];
 						String valString = (String) strColumnValue;
@@ -946,7 +987,9 @@ public class DBApp {
 							result.append(0);
 					} else if (dateType) {
 						Date objDate = (Date) o[idxStrKey];
-						Date valDate = new Date(strColumnValue);
+						SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date valDate = dateFormat.parse(strColumnValue);
 						if (objDate.compareTo(valDate) < 0)
 							result.append(1);
 						else
@@ -973,8 +1016,8 @@ public class DBApp {
 		return result.toString();
 	}
 
-	public static String GREATERTHANOREQUALNONINDEXED(String strTableName, String strColumnName,
-			String strColumnValue) {
+	public static String GREATERTHANOREQUALNONINDEXED(String strTableName, String strColumnName, String strColumnValue)
+			throws ParseException {
 		// use .toLowerCase()
 		File file = new File("pages/");
 		String[] paths = file.list();
@@ -1028,6 +1071,10 @@ public class DBApp {
 				Object[] o;
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
+					if (o[idxStrKey].toString().equals("empty cell")) {
+						result.append(0);
+						continue;
+					}
 					if (stringType || booleanType) {
 						String objString = (String) o[idxStrKey];
 						String valString = (String) strColumnValue;
@@ -1037,7 +1084,9 @@ public class DBApp {
 							result.append(0);
 					} else if (dateType) {
 						Date objDate = (Date) o[idxStrKey];
-						Date valDate = new Date(strColumnValue);
+						SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date valDate = dateFormat.parse(strColumnValue);
 						if (objDate.compareTo(valDate) >= 0)
 							result.append(1);
 						else
@@ -1064,7 +1113,8 @@ public class DBApp {
 		return result.toString();
 	}
 
-	public static String GREATERTHANNONINDEXED(String strTableName, String strColumnName, String strColumnValue) {
+	public static String GREATERTHANNONINDEXED(String strTableName, String strColumnName, String strColumnValue)
+			throws ParseException {
 		// use .toLowerCase()
 		File file = new File("pages/");
 		String[] paths = file.list();
@@ -1118,6 +1168,10 @@ public class DBApp {
 				Object[] o;
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
+					if (o[idxStrKey].toString().equals("empty cell")) {
+						result.append(0);
+						continue;
+					}
 					if (stringType || booleanType) {
 						String objString = (String) o[idxStrKey];
 						String valString = (String) strColumnValue;
@@ -1127,7 +1181,9 @@ public class DBApp {
 							result.append(0);
 					} else if (dateType) {
 						Date objDate = (Date) o[idxStrKey];
-						Date valDate = new Date(strColumnValue);
+						SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date valDate = dateFormat.parse(strColumnValue);
 						if (objDate.compareTo(valDate) > 0)
 							result.append(1);
 						else
@@ -1154,7 +1210,10 @@ public class DBApp {
 		return result.toString();
 	}
 
-	public static String EQUALNONINDEXED(String strTableName, String strColumnName, Object strColumnValue) {
+	public static String EQUALNONINDEXED(String strTableName, String strColumnName, Object strColumnValue)
+			throws ParseException {
+		if (strColumnName.equals("TouchDate"))
+			return "";
 		File file = new File("pages/");
 		String[] paths = file.list();
 		paths = sortPaths(paths);
@@ -1188,16 +1247,28 @@ public class DBApp {
 				for (int i = 0; i < v.size(); i++) {
 					o = (Object[]) (v.get(i));
 					boolean equals = false;
-					if (o[idxStrKey] instanceof String)
+					if (o[idxStrKey].toString().equals("empty cell")) {
+						result.append(0);
+						continue;
+					}
+					if (o[idxStrKey] instanceof String) {
 						equals = ((String) (o[idxStrKey])).equals(strColumnValue);
-					if (o[idxStrKey] instanceof Double)
+					}
+					if (o[idxStrKey] instanceof Double) {
 						equals = ((Double) o[idxStrKey]) == Double.parseDouble((String) strColumnValue);
-					if (o[idxStrKey] instanceof Integer)
+					}
+					if (o[idxStrKey] instanceof Integer) {
 						equals = ((Integer) o[idxStrKey]) == Integer.parseInt((String) strColumnValue);
+					}
 					if (o[idxStrKey] instanceof Boolean)
 						equals = ((Boolean) o[idxStrKey]) == Boolean.parseBoolean((String) strColumnValue);
-					if (o[idxStrKey] instanceof Date)
-						equals = ((Date) o[idxStrKey]).equals(new Date((String) strColumnValue));
+					if (o[idxStrKey] instanceof Date) {
+						Date objDate = (Date) o[idxStrKey];
+						SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date valDate = dateFormat.parse(strColumnValue + "");
+						equals = objDate.compareTo(valDate) == 0;
+					}
 					if (equals)
 						result.append(1);
 					else
@@ -1208,7 +1279,8 @@ public class DBApp {
 		return result.toString();
 	}
 
-	public static String NOTEQUALNONINDEXED(String strTableName, String strColumnName, String strColumnValue) {
+	public static String NOTEQUALNONINDEXED(String strTableName, String strColumnName, String strColumnValue)
+			throws ParseException {
 		String equal = EQUALNONINDEXED(strTableName, strColumnName, strColumnValue);
 		StringBuilder notEqual = new StringBuilder();
 		for (int i = 0; i < equal.length(); i++)
@@ -1220,7 +1292,7 @@ public class DBApp {
 	}
 
 	public static String ControlUnitNonIndexed(String strTableName, String strColumnName, String strColumnValue,
-			String strOperator) {
+			String strOperator) throws ParseException {
 		String result = "";
 		switch (strOperator) {
 		case ">":
@@ -1245,7 +1317,7 @@ public class DBApp {
 		return result;
 	}
 
-	public static String SQLOperation(SQLTerm[] arrSQLTerms, String[] strArrOperators) {
+	public static String SQLOperation(SQLTerm[] arrSQLTerms, String[] strArrOperators) throws ParseException {
 		String result = "";
 		ArrayList<String> realTerms = turnSQLTermToBitmap(arrSQLTerms);
 		ArrayList<String> realOperators = new ArrayList<>();
@@ -1255,7 +1327,7 @@ public class DBApp {
 		return result;
 	}
 
-	public static ArrayList<String> turnSQLTermToBitmap(SQLTerm[] arrSQLTerms) {
+	public static ArrayList<String> turnSQLTermToBitmap(SQLTerm[] arrSQLTerms) throws ParseException {
 		ArrayList<String> bitmaps = new ArrayList<>();
 		for (int i = 0; i < arrSQLTerms.length; i++) {
 			// strTableName table name
@@ -1273,7 +1345,7 @@ public class DBApp {
 		return bitmaps;
 	}
 
-	public static Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strArrOperators) {
+	public static Iterator selectFromTable(SQLTerm[] arrSQLTerms, String[] strArrOperators) throws ParseException {
 		String valid = SQLOperation(arrSQLTerms, strArrOperators);
 		// System.out.println("valid: " + valid);
 		ArrayList<Object> returned = new ArrayList<>();
@@ -1376,200 +1448,253 @@ public class DBApp {
 		return result;
 	}
 
-	public static void main(String[] args) throws DBAppException, IOException, ParseException {
-		SQLTerm[] arrSQLTerms = new SQLTerm[2];
-		arrSQLTerms[0] = new SQLTerm();
-		arrSQLTerms[1] = new SQLTerm();
-		arrSQLTerms[0].strTableName = "teamDB";
-		arrSQLTerms[0].strColumnName = "name";
-		arrSQLTerms[0].strOperator = "=";
-		arrSQLTerms[0].objValue = "abcdefg";
-		arrSQLTerms[1].strTableName = "teamDB";
-		arrSQLTerms[1].strColumnName = "gpa";
-		arrSQLTerms[1].strOperator = "<=";
-		arrSQLTerms[1].objValue = new Double(1.5);
-		String[] strArrOperators = new String[1];
-		strArrOperators[0] = "OR";
-		// ArrayList<String> operators = new ArrayList<>();
-		// operators.add("XOR");
-		// System.out.println(turnSQLTermToBitmap(arrSQLTerms).toString());
-		// System.out.println(bitSQLQuery(turnSQLTermToBitmap(arrSQLTerms), operators));
-		// System.out.println(loopForOR(loopForXOR(loopForAND(bitSQLQuery(turnSQLTermToBitmap(arrSQLTerms),
-		// operators)))));
-		Iterator iterator = selectFromTable(arrSQLTerms, strArrOperators);
-		while (iterator.hasNext()) {
-			Object[] tuple = (Object[]) iterator.next();
-			for (int i = 0; i < tuple.length; i++)
-				System.out.print(tuple[i].toString() + " ");
-			System.out.println();
-			// System.out.println(tuple.length);
+	// public static void parentDelete(String strTableName, Hashtable<String,
+	// Object> htblColNameValue)
+	// throws FileNotFoundException, DBAppException, IOException {
+	// String flag = getNameofIndexedCol(strTableName, htblColNameValue);
+	// if (flag == "") {
+	// deleteFromTable(strTableName, htblColNameValue);
+	// } else {
+	//
+	// }
+	//
+	// }
+
+	public static void parentInsert(String strTableName, Hashtable<String, Object> htblColNameValue)
+			throws DBAppException, IOException, ParseException, ClassNotFoundException {
+
+		String flag = getNameofIndexedCol(strTableName, htblColNameValue);
+		if (flag.equals("")) {
+			insertIntoTable(strTableName, htblColNameValue);
+		} else {
+			// use bitmaps;
 		}
-		// ArrayList<String> testingReduceTerm = new ArrayList<>();
-		// testingReduceTerm.add("1000110001");
-		// testingReduceTerm.add("OR");
-		// testingReduceTerm.add("0100000010");
-		// testingReduceTerm.add("AND");
-		// testingReduceTerm.add("0010000100");
-		// testingReduceTerm.add("XOR");
-		// testingReduceTerm.add("0010000110");
-		// System.out.println(loopForOR(loopForXOR(loopForAND(testingReduceTerm))));
-		// System.out.println(ControlUnit("table", "number", "1", "=", "", ""));
-		// System.out.println(retrieveBitmapIndex("table", "number", "3"));
-		// System.out.println(retrieveBitmapIndex("table", "number", "2"));
-		// System.out.println(retrieveBitmapIndex("table", "number", "1"));
-		// BitmapPair[] bp = new BitmapPair[3];
-		// bp[0] = new BitmapPair("moe", "10101010");
-		// bp[1] = new BitmapPair("joe", "01010101");
-		// bp[2] = new BitmapPair("fadi", "00000000");
-		// Vector<Object> v = new Vector<>();
-		// v.add(bp[0]);
-		// v.add(bp[1]);
-		// v.add(bp[2]);
-		// FileOutputStream fileOut = new FileOutputStream("bitmaps/" +
-		// "tablenameindex_1");
-		// ObjectOutputStream out = new ObjectOutputStream(fileOut);
-		// out.writeObject(v);
-		// out.close();
-		// BitmapPair[] bpTest = new BitmapPair[5];
-		// bpTest[0] = new BitmapPair("1", "101001000");
-		// bpTest[1] = new BitmapPair("2", "010000000");
-		// bpTest[2] = new BitmapPair("3", "000100000");
-		// bpTest[3] = new BitmapPair("4", "000010000");
-		// bpTest[4] = new BitmapPair("5", "000000111");
-		// Vector<Object> vTest = new Vector<>();
-		// vTest.add(bpTest[0]);
-		// vTest.add(bpTest[1]);
-		// vTest.add(bpTest[2]);
-		// vTest.add(bpTest[3]);
-		// vTest.add(bpTest[4]);
-		// // System.out.println(vTest.toString());
-		// FileOutputStream fileOut = new FileOutputStream("bitmaps/" +
-		// "tablenumberindex_1");
-		// ObjectOutputStream out = new ObjectOutputStream(fileOut);
-		// out.writeObject(vTest);
-		// out.close();
-		// System.out.println(retrieveBitmapIndex("table", "name", "joe"));
-		// System.out.println(retrieveBitmapIndex("table", "name", "moe"));
-		// System.out.println(retrieveBitmapIndex("table", "name", "zizo"));
-		// String columnValue1 = retrieveBitmapIndex("table", "name", "joe");
-		// String columnValue2 = retrieveBitmapIndex("table", "name", "moe");
-		// System.out.println(AND(columnValue1, columnValue2));
-		// System.out.println(NOTEQUAL("table", "name", "joe"));
-		// System.out.println(v.toString());
+	}
 
-		String strTableName = "teamDB";
-		String string = "January 2, 2009";
+	// names if col with bitmaps and we need it
+	public static String getNameofIndexedCol(String tableName, Hashtable<String, Object> htblColNameValue) {
+		String colName = "";
+		String result = "";
+		File meta = new File("meta.csv");
+		try {
+			Scanner inputStream = new Scanner(meta);
+			while (inputStream.hasNextLine()) {
+				String s = inputStream.nextLine();
+				if (s.split(", ")[0].equals(tableName) && s.split(", ")[4].equals("True")) {
+					colName = s.split(", ")[1];
+					if (htblColNameValue.containsKey(colName)) {
+						result += colName + " ";
+					}
 
-		// System.out.println(getIndexOfNonIndexed(strTableName, "gpa", "0.95"));
+				}
+			}
+			inputStream.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 
-		// Hashtable htblColNameType = new Hashtable();
-		// htblColNameType.put("id", "java.lang.Integer");
-		// htblColNameType.put("name", "java.lang.String");
-		// htblColNameType.put("gpa", "java.lang.double");
-		// htblColNameType.put("date", "java.util.Date");
-		// table has already been created
-		// createTable(strTableName, "id", htblColNameType);
+		}
+		return result;
+	}
 
-		// Hashtable htblColNameValue = new Hashtable();
-		// htblColNameValue.put("id", new Integer(7));
-		// // htblColNameValue.put("name", new String("z"));
-		// htblColNameValue.put("gpa", new Double(0.95));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
+	public static String bitmapOfColumns(String strTableName, Hashtable<String, Object> htblColNameValue)
+			throws ParseException {
+		Enumeration<String> enumerator = htblColNameValue.keys();
+		String result = "";
+		while (enumerator.hasMoreElements()) {
+			// public static String retrieveBitmapIndex(String strTableName, String
+			/////////////////////////////////////////////////// strColumnName, String
+			/////////////////////////////////////////////////// strColumnValue) {
+			String key = enumerator.nextElement();
+			String bitmap = retrieveBitmapIndex(strTableName, key, htblColNameValue.get(key) + "");
+			// String bitmap = EQUALNONINDEXED(strTableName, key,
+			// htblColNameValue.get(key));
 
-		////////////////////////////////////////////////////
+			// System.out.println("key: " + key);
+			// System.out.println("Bitmap: " + bitmap);
+			if (bitmap.length() == 0)
+				bitmap = EQUALNONINDEXED(strTableName, key, htblColNameValue.get(key));
+			result = bitmap;
+			break;
+		}
 
-		//////////////////////////////////////////
-		// string = "January 2, 2007";
-		// htblColNameValue.put("id", new Integer(1));
-		// // htblColNameValue.put("name", new String("d"));
-		// htblColNameValue.put("gpa", new Double(1.25));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		//////////////////////////////////////////////////////
-		// string = "January 2, 2006";
-		// htblColNameValue.put("name", new String("c"));
-		// htblColNameValue.put("date", new Date(string));
-		// htblColNameValue.put("id", new Integer(11));
-		// // htblColNameValue.put("name", new String("c"));
-		// htblColNameValue.put("gpa", new Double(1.5));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		////////////////////////////////////////////////
-		// string = "January 2, 2006";
-		// htblColNameValue.put("id", new Integer(7));
-		// // htblColNameValue.put("name", new String("c"));
-		// // htblColNameValue.put("gpa", new Double(1.5));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		///////////////////////////////////////////////////////
+		while (enumerator.hasMoreElements()) {
+			String key = enumerator.nextElement();
+			String bitmap = retrieveBitmapIndex(strTableName, key, htblColNameValue.get(key) + "");
+			if (bitmap.length() == 0)
+				bitmap = EQUALNONINDEXED(strTableName, key, htblColNameValue.get(key) + "");
+			result = AND(result, bitmap);
+			// System.out.println("key: " + key);
+			// System.out.println("Bitmap: " + bitmap);
+			// System.out.println("Result: " + result);
+		}
 
-		// string = "January 2, 2017";
-		// htblColNameValue.put("id", new Integer(5));
-		// htblColNameValue.put("name", new String("a"));
-		// htblColNameValue.put("gpa", new Double(1.5));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
+		return result;
+	}
 
-		//////////////////////////////////////////////////////
-		// string = "January 2, 2018";
-		// htblColNameValue.put("id", new Integer(6));
-		// htblColNameValue.put("name", new String("d"));
-		// htblColNameValue.put("gpa", new Double(1.5));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		//////////////////////////////////////////////////////
-		// string = "January 2, 1950";
-		// htblColNameValue.put("name", new String("y"));
-		// htblColNameValue.put("gpa", new Double(1.3));
-		// htblColNameValue.put("id", new Integer(11));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
+	public static ArrayList<BitmapPair> readBitmap(String tableName, String colName) throws FileNotFoundException {
+		String[] paths = new File("bitmaps").list();
+		ArrayList<BitmapPair> bitmapPairs = new ArrayList<>();
 
-		//////////////////////////////////////////////////////
-		// string = "December 15, 1998";
-		// htblColNameValue.put("id", new Integer(15));
-		// htblColNameValue.put("name", new String("Moe"));
-		// htblColNameValue.put("gpa", new Double(2.7));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		// readTables(strTableName);
+		for (String path : paths) {
+			String[] splitted = path.split("_");
+			if (splitted[0].equals(tableName) && splitted[1].equals(colName)) {
+				Vector<BitmapPair> list = Bitmap.getBitMapPair("bitmaps/" + path);
+				for (BitmapPair pair : list) {
+					bitmapPairs.add(new BitmapPair(pair.value, pair.bitmap));
 
-		////////////////////////////////////////////////////
-		// string = "January 2, 1999";
+				}
+
+			}
+		}
+		return bitmapPairs;
+	}
+
+	public static int deleteUsingBitmap(String strTableName, Hashtable<String, Object> htblColNameValue)
+			throws ParseException, FileNotFoundException, IOException {
+		// System.out.println("in here");
+		String toBeDeleted = bitmapOfColumns(strTableName, htblColNameValue);
+		ArrayList<Integer> pagesToBeDeletedFrom = getPagesOfBitmap(toBeDeleted, strTableName);
+		// System.out.println(pagesToBeDeletedFrom.toString());
+		File file = new File("pages/");
+		String[] paths = sortPaths(file.list());
+		Object tuple[] = new Object[htblColNameValue.size()];
+		tuple = getValueInOrder(strTableName, htblColNameValue);
+		int deleted = 0;
+		int counter = 0;
+		for (int page : pagesToBeDeletedFrom) {
+			Vector<Object> v = getNumberOfTuples("pages/" + paths[page - 1]);
+			Object o[];
+			for (int i = 0; i < v.size(); counter++) {
+				o = (Object[]) v.get(i);
+				boolean equals = true;
+				for (int j = 1; j < o.length; j++) {
+					if (!(o[j] == null) && !o[j].equals(tuple[j])
+							&& !(tuple[j] instanceof String && tuple[j].equals(deprecated))) {
+						if (o[j] instanceof String)
+							equals = ((String) (o[j])).equals(tuple[j]);
+						if (o[j] instanceof Double)
+							equals = ((Double) o[j]) == Double.parseDouble(tuple[j] + "");
+						if (o[j] instanceof Integer)
+							equals = ((Integer) o[j]) == Integer.parseInt(tuple[j] + "");
+						if (o[j] instanceof Boolean)
+							equals = ((Boolean) o[j]) == Boolean.parseBoolean(tuple[j] + "");
+						if (o[j] instanceof Date) {
+							SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+									Locale.ENGLISH);
+							// equals = false;
+							equals = ((Date) o[j]).equals(dateFormat.parse(tuple[j] + ""));
+
+						}
+						// System.out.println(equals);
+					}
+				}
+				if (equals) {
+					// System.out.println("in equals");
+					v.remove(i);
+					deleted++;
+					Bitmap.updateOnDelete(counter--, strTableName);
+				} else
+					i++;
+				File deletedFile = new File("pages/" + paths[page - 1]);
+				deletedFile.delete();
+				if (v.size() > 0) {
+					try {
+						FileOutputStream fileOut = new FileOutputStream("pages/" + paths[page - 1]);
+						ObjectOutputStream out = new ObjectOutputStream(fileOut);
+						out.writeObject(v);
+						out.close();
+						fileOut.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return deleted;
+	}
+
+	public static void updateUsingBitmap(String strTableName, String strKey, Hashtable<String, Object> htblColNameValue)
+			throws FileNotFoundException, DBAppException, IOException, ParseException, ClassNotFoundException {
+		Hashtable passedToDelete = new Hashtable();
+		validateEntry(strTableName, htblColNameValue, false);
+		String metaFile = "meta.csv";
+		File meta = new File(metaFile);
+		boolean found = false;
+		try {
+			Scanner sc = new Scanner(meta);
+			while (sc.hasNext() && !found) {
+				String data = sc.nextLine();
+				String x[] = data.split("_");
+				if (x[0].startsWith(strTableName)) {
+					if ((data.split(", ")[3]).equals("True")) {
+						passedToDelete.put(data.split(", ")[1], new String(strKey));
+						found = true;
+						break;
+					}
+				}
+			}
+			sc.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		// System.out.println("strTableName: " + strTableName);
+		// System.out.println("key: " + passedToDelete.get("id"));
+		int deletedCount = deleteUsingBitmap(strTableName, passedToDelete);
+		// System.out.println("deletedCount: " + deletedCount);
+		while (deletedCount-- > 0)
+			insertIntoTable(strTableName, htblColNameValue);
+	}
+
+	static ArrayList<Integer> getPages(String strTableName) {
+		File dir = new File("pages/");
+		String[] paths = DBApp.sortPaths(dir.list());
+		ArrayList<Integer> ans = new ArrayList();
+		int sum = 0;
+		for (String path : paths) {
+			String[] splitted = path.split("_");
+			if (splitted[0].equals(strTableName)) {
+				Vector<Object> v = DBApp.getNumberOfTuples("pages/" + path);
+				sum += v.size();
+				ans.add(sum);
+			}
+		}
+		return ans;
+	}
+
+	static ArrayList<Integer> getPagesOfBitmap(String bitmap, String tableName) {
+		TreeSet<Integer> set = new TreeSet();
+		ArrayList<Integer> pages = getPages(tableName);
+
+		for (int i = 0, j = 0; i < bitmap.length(); i++) {
+			if (bitmap.charAt(i) == '1') {
+				while (i + 1 > pages.get(j))
+					j++;
+				set.add(j + 1);
+			}
+		}
+		ArrayList<Integer> ans = new ArrayList<>();
+		for (int x : set)
+			ans.add(x);
+		return ans;
+	}
+
+	public static void main(String[] args) throws DBAppException, IOException, ParseException {
+		Hashtable htblColNameValue = new Hashtable();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+		Date date = dateFormat.parse("Sat Jan 02 00:00:00 EET 2016");
+		// System.out.println(date);
 		// htblColNameValue.put("id", new Integer(2));
-		// htblColNameValue.put("name", new String("abcdefg"));
-		// htblColNameValue.put("gpa", new Double(4.4255));
-		// htblColNameValue.put("date", new Date(string));
-		// insertIntoTable(strTableName, htblColNameValue);
-		// readTables(strTableName);
-
-		///////////////////////////////////////////////////
-		// string = "January 2, 1999";
-		// htblColNameValue.put("id", new Integer(3));
-		// htblColNameValue.put("name", new String("abcdefg"));
-		// htblColNameValue.put("gpa", new Double(4.0));
-		// htblColNameValue.put("date", new Date(string));
-		// updateTable(strTableName, "2", htblColNameValue);
-		// htblColNameValue.clear();
-		// readTables(strTableName);
-		///////////////////////////////////////////////////
-		// htblColNameValue.put("id", new Integer(11));
-		// htblColNameValue.put("name", deprecated);
-		// htblColNameValue.put("gpa", deprecated);
-		// htblColNameValue.put("date", deprecated);
-		// deleteFromTable(strTableName, htblColNameValue);
-		// htblColNameValue.clear();
-		// System.out.println(EQUALNONINDEXED(strTableName, "name", "abcdefg"));
-		// readTables(strTableName);
-		createBitmapIndex("teamDB", "gpa");
+		// htblColNameValue.put("name", new String("should be 13"));
+		// htblColNameValue.put("gpa", new Double(1.5));
+		htblColNameValue.put("date", date);
+		deleteUsingBitmap("teamDB", htblColNameValue);
+		// createBitmapIndex("teamDB", "id");
+		// createBitmapIndex("teamDB", "gpa");
+		// updateUsingBitmap("teamDB", "21", htblColNameValue);
+		// System.out.println(retrieveBitmapIndex("teamDB", "id", "7"));
+		// System.out.println(retrieveBitmapIndex("teamDB", "id", "15"));
+		// System.out.println(retrieveBitmapIndex("teamDB", "id", "7"));
+		htblColNameValue.clear();
 		readTables("teamDB");
 	}
 
@@ -1587,7 +1712,7 @@ public class DBApp {
 		}
 	}
 
-	public static Bitmap createBitmapIndex(String tableName, String colName) throws IOException {
+	public static Bitmap createBitmapIndex(String tableName, String colName) throws IOException, ParseException {
 		return new Bitmap(tableName, colName);
 	}
 }
