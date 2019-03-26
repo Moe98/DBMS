@@ -115,85 +115,90 @@ public class DBApp {
 
 	}
 
-	static int getIndex(String strTableName, Hashtable<String, Object> htblColNameValue)
-			throws FileNotFoundException, IOException {
-		String fileNameDefined = "meta.csv";
-		int whichClusCol = 0;
-		File meta = new File(fileNameDefined);
-		try {
-			Scanner inputStream = new Scanner(meta);
-			while (inputStream.hasNextLine()) {
-				String data = inputStream.nextLine();
-				if (data.split(", ")[0].equals(strTableName)) {
-					if ((data.split(", ")[3]).equals("False")) {
-						whichClusCol++;
-					} else {
-						whichClusCol++;
-						break;
-					}
-				}
-			}
-			inputStream.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		int index = 0;
-		File file = new File("pages/");
-		String[] paths = file.list();
-		String last = null;
-		Object[] tuple = new Object[htblColNameValue.size()];
-		tuple = getValueInOrder(strTableName, htblColNameValue);
-		/////////////// sorting the paths///////////////////////////
-		paths = sortPaths(paths);
-		///////////////////////////////////////////////////
-		for (int j = 0; j < paths.length; j++) {
-			String[] x = paths[j].split("_");
-			if (x[0].equals(strTableName)) {
-				last = paths[j];
-				Vector<Object> v = getNumberOfTuples("pages/" + last);
-				Object[] o;
-				for (int i = 0; i < v.size(); i++) {
-					o = (Object[]) (v.get(i));
-					if (o[whichClusCol] instanceof java.lang.Integer) {
-						if (((Integer) o[whichClusCol]).compareTo(((Integer) tuple[whichClusCol])) >= 0) {
-							return index;
-						}
-					} else {
-						if (o[whichClusCol] instanceof java.lang.String) {
-							if (((String) o[whichClusCol]).compareTo((String) tuple[whichClusCol]) >= 0) {
-								return index;
-							}
-						} else {
-							if (o[whichClusCol] instanceof java.lang.Double) {
-								if (((Double) o[whichClusCol]).compareTo((Double) tuple[whichClusCol]) >= 0) {
-									return index;
-								}
-							} else {
-								// change date type here
-								//
-								//
-								//
-								//
-								if (o[whichClusCol] instanceof Date) {
-									if (((Date) o[whichClusCol]).compareTo((Date) tuple[whichClusCol]) >= 0) {
-										return index;
-									}
-								} else {
-									if (o[whichClusCol] instanceof java.lang.Boolean) {
-										if (((Boolean) o[whichClusCol]).compareTo((Boolean) tuple[whichClusCol]) >= 0) {
-											return index;
-										}
-									}
-								}
-							}
-						}
-					}
-					index++;
-				}
-			}
-		}
-		return index;
-	}
+	// static int getIndex(String strTableName, Hashtable<String, Object>
+	// htblColNameValue)
+	// throws FileNotFoundException, IOException {
+	// String fileNameDefined = "meta.csv";
+	// int whichClusCol = 0;
+	// File meta = new File(fileNameDefined);
+	// try {
+	// Scanner inputStream = new Scanner(meta);
+	// while (inputStream.hasNextLine()) {
+	// String data = inputStream.nextLine();
+	// if (data.split(", ")[0].equals(strTableName)) {
+	// if ((data.split(", ")[3]).equals("False")) {
+	// whichClusCol++;
+	// } else {
+	// whichClusCol++;
+	// break;
+	// }
+	// }
+	// }
+	// inputStream.close();
+	// } catch (FileNotFoundException e) {
+	// e.printStackTrace();
+	// }
+	// int index = 0;
+	// File file = new File("pages/");
+	// String[] paths = file.list();
+	// String last = null;
+	// Object[] tuple = new Object[htblColNameValue.size()];
+	// tuple = getValueInOrder(strTableName, htblColNameValue);
+	// /////////////// sorting the paths///////////////////////////
+	// paths = sortPaths(paths);
+	// ///////////////////////////////////////////////////
+	// for (int j = 0; j < paths.length; j++) {
+	// String[] x = paths[j].split("_");
+	// if (x[0].equals(strTableName)) {
+	// last = paths[j];
+	// Vector<Object> v = getNumberOfTuples("pages/" + last);
+	// Object[] o;
+	// for (int i = 0; i < v.size(); i++) {
+	// o = (Object[]) (v.get(i));
+	// if (o[whichClusCol] instanceof java.lang.Integer) {
+	// if (((Integer) o[whichClusCol]).compareTo(((Integer) tuple[whichClusCol])) >=
+	// 0) {
+	// return index;
+	// }
+	// } else {
+	// if (o[whichClusCol] instanceof java.lang.String) {
+	// if (((String) o[whichClusCol]).compareTo((String) tuple[whichClusCol]) >= 0)
+	// {
+	// return index;
+	// }
+	// } else {
+	// if (o[whichClusCol] instanceof java.lang.Double) {
+	// if (((Double) o[whichClusCol]).compareTo((Double) tuple[whichClusCol]) >= 0)
+	// {
+	// return index;
+	// }
+	// } else {
+	// // change date type here
+	// //
+	// //
+	// //
+	// //
+	// if (o[whichClusCol] instanceof Date) {
+	// if (((Date) o[whichClusCol]).compareTo((Date) tuple[whichClusCol]) >= 0) {
+	// return index;
+	// }
+	// } else {
+	// if (o[whichClusCol] instanceof java.lang.Boolean) {
+	// if (((Boolean) o[whichClusCol]).compareTo((Boolean) tuple[whichClusCol]) >=
+	// 0) {
+	// return index;
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
+	// index++;
+	// }
+	// }
+	// }
+	// return index;
+	// }
 
 	static void validateEntry(String strTableName, Hashtable<String, Object> htblColNameValue, boolean insert)
 			throws DBAppException, FileNotFoundException, IOException {
@@ -215,7 +220,7 @@ public class DBApp {
 					if (values[2].substring(1).equals("java.lang.Integer"))
 						if (!(givenValue instanceof Integer))
 							throw new DBAppException();
-					if (values[2].substring(1).equals("java.lang.double"))
+					if (values[2].substring(1).equals("java.lang.Double"))
 						if (!(givenValue instanceof Double))
 							throw new DBAppException();
 					if (values[2].substring(1).equals("java.lang.Boolean"))
@@ -241,7 +246,7 @@ public class DBApp {
 		validateEntry(strTableName, htblColNameValue, true);
 		int p1 = getIndex(strTableName, htblColNameValue);
 		pushDown(p1 + 1, strTableName, htblColNameValue);
-		Bitmap.updateOnInsert(p1, "teamDB", htblColNameValue);
+		Bitmap.updateOnInsert(p1, strTableName, htblColNameValue);
 	}
 
 	static Object[] getValueInOrder(String strTableName, Hashtable<String, Object> htblColNameValue)
@@ -1676,6 +1681,264 @@ public class DBApp {
 		for (int x : set)
 			ans.add(x);
 		return ans;
+	}
+
+	static int getIndex(String strTableName, Hashtable<String, Object> htblColNameValue)
+			throws FileNotFoundException, IOException, ParseException {
+		String fileNameDefined = "meta.csv";
+		int whichClusCol = 0;
+		File meta = new File(fileNameDefined);
+		try {
+			Scanner inputStream = new Scanner(meta);
+			while (inputStream.hasNextLine()) {
+				String data = inputStream.nextLine();
+				if (data.split(", ")[0].equals(strTableName)) {
+					if ((data.split(", ")[3]).equals("False")) {
+						whichClusCol++;
+					} else {
+						whichClusCol++;
+						break;
+					}
+				}
+			}
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		int index = 0;
+		File file = new File("bitmaps/");
+		String[] paths = file.list();
+		String last = null;
+		Object[] tuple = new Object[htblColNameValue.size()];
+		tuple = getValueInOrder(strTableName, htblColNameValue);
+		/////////////// sorting the paths///////////////////////////
+		paths = sortPaths(paths);
+		///////////////////////////////////////////////////
+		for (String path : paths) {
+			String[] splitted = path.split("_");
+			System.out.println(Bitmap.getNameofColumn(strTableName, whichClusCol - 1));
+			if (splitted[0].equals(strTableName)
+					&& splitted[1].equals(Bitmap.getNameofColumn(strTableName, whichClusCol - 1))) {
+				String colName = Bitmap.getNameofColumn(strTableName, whichClusCol - 1);
+				String type = Bitmap.getType(strTableName, colName);
+				System.out.println(path);
+				Vector<BitmapPair> list = Bitmap.getBitMapPair("bitmaps/" + path);
+				BitmapPair pair = list.get(list.size() - 1);
+				String v = pair.value;
+				if (Bitmap.isInteger(v)) {
+					if (new Integer(Integer.parseInt(v)).compareTo((Integer) tuple[whichClusCol]) < 0) {
+						System.out.println(" less ");
+						continue;
+					} else {
+						System.out.println(" binary search ");
+						System.out.println(list);
+						System.out.println(tuple[whichClusCol].toString());
+						int x = binarySearch(list, tuple[whichClusCol]);
+						if (x == -1) {
+							break;
+						} else {
+							return x;
+						}
+					}
+				} else {
+					if (Bitmap.isBoolean(v)) {
+						if ((v.equals("false") && ((String) tuple[whichClusCol]).equals("true"))) {
+							continue;
+						} else {
+							int x = binarySearch(list, tuple[whichClusCol]);
+							if (x == -1) {
+								break;
+							} else {
+								return x;
+							}
+						}
+					} else {
+						if (Bitmap.isDouble(v)) {
+							Double tmp = Double.parseDouble(tuple[whichClusCol].toString());
+							if ((Double.parseDouble(v)) < tmp) {
+								continue;
+							} else {
+								int x = binarySearch(list, tuple[whichClusCol]);
+								if (x == -1) {
+									break;
+								} else {
+									return x;
+								}
+							}
+
+						} else {
+							if (type.equals("Date")) {
+								SimpleDateFormat formatter6 = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+										Locale.ENGLISH);
+								Date v1 = formatter6.parse(v), tmp = formatter6.parse(tuple[whichClusCol].toString());
+								if (v1.compareTo(tmp) < 0) {
+									continue;
+								} else {
+									int x = binarySearch(list, tuple[whichClusCol]);
+									if (x == -1) {
+										break;
+									} else {
+										return x;
+									}
+								}
+							} else {
+								if (v instanceof java.lang.String) {
+									if (((String) v).compareTo((String) tuple[whichClusCol]) < 0) {
+										continue;
+									} else {
+										int x = binarySearch(list, tuple[whichClusCol]);
+										if (x == -1) {
+											break;
+										} else {
+											return x;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		file = new File("pages/");
+		paths = file.list();
+		paths = sortPaths(paths);
+		for (String path : paths) {
+			for (int j = 0; j < paths.length; j++) {
+				String[] x = paths[j].split("_");
+				if (x[0].equals(strTableName)) {
+					last = paths[j];
+					Vector<Object> v = getNumberOfTuples("pages/" + last);
+					Object[] o;
+					for (int i = 0; i < v.size(); i++) {
+						o = (Object[]) (v.get(i));
+						if (o[whichClusCol] instanceof java.lang.Integer) {
+							if (((Integer) o[whichClusCol]).compareTo(((Integer) tuple[whichClusCol])) >= 0) {
+								return index;
+							}
+						} else {
+							if (o[whichClusCol] instanceof java.lang.String) {
+								if (((String) o[whichClusCol]).compareTo((String) tuple[whichClusCol]) >= 0) {
+									return index;
+								}
+							} else {
+								if (o[whichClusCol] instanceof java.lang.Double) {
+									if (((Double) o[whichClusCol]).compareTo((Double) tuple[whichClusCol]) >= 0) {
+										return index;
+									}
+								} else {
+									if (o[whichClusCol] instanceof Date) {
+										if (((Date) o[whichClusCol]).compareTo((Date) tuple[whichClusCol]) >= 0) {
+											return index;
+										}
+									} else {
+										if (o[whichClusCol] instanceof java.lang.Boolean) {
+											if (((Boolean) o[whichClusCol])
+													.compareTo((Boolean) tuple[whichClusCol]) >= 0) {
+												return index;
+											}
+										}
+									}
+								}
+							}
+						}
+						index++;
+					}
+				}
+			}
+			return index;
+		}
+		return index;
+	}
+
+	public static int binarySearch(Vector<BitmapPair> v, Object o) throws ParseException {
+		if (o instanceof java.lang.Integer) {
+			int i = 0;
+			int j = (v.size() - 1);
+			int result = 0;
+
+			while (i <= j) {
+
+				int insert = Integer.parseInt(o.toString());
+				BitmapPair tmp2 = v.get(i + j >> 1);
+				int tmp = Integer.parseInt(tmp2.value);
+				if (tmp >= insert) {
+					result = (i + j) / 2;
+					j = (i + j) / 2 - 1;
+
+				} else {
+					i = ((i + j) / 2) + 1;
+				}
+			}
+
+			return v.get(result).bitmap.indexOf('1');
+		} else {
+			if (o instanceof java.lang.String) {
+				int i = 0;
+				int j = (v.size() - 1);
+				int result = 0;
+				while (i <= j) {
+					if (v.get((i + j) / 2).value.compareTo((String) o) >= 0) {
+						result = (i + j) / 2;
+						j = (i + j) / 2 - 1;
+					} else {
+						i = ((i + j) / 2) + 1;
+					}
+				}
+				return v.get(result).bitmap.indexOf('1');
+			} else {
+				if (o instanceof java.lang.Double) {
+					int i = 0;
+					int j = (v.size() - 1);
+					int result = 0;
+					while (i <= j) {
+						if (Double.parseDouble(v.get((i + j) / 2).value) >= (Double) o) {
+							result = (i + j) / 2;
+							j = (i + j) / 2 - 1;
+						} else {
+							i = ((i + j) / 2) + 1;
+						}
+					}
+					return v.get(result).bitmap.indexOf('1');
+				} else {
+					if (o instanceof Date) {
+						int i = 0;
+						SimpleDateFormat formatter6 = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+								Locale.ENGLISH);
+						Date insert = formatter6.parse(o.toString());
+						int j = (v.size() - 1);
+						int result = 0;
+						while (i <= j) {
+							Date tmp = formatter6.parse(v.get((i + j) / 2).value);
+							if (tmp.compareTo(insert) >= 0) {
+								result = (i + j) / 2;
+								j = (i + j) / 2 - 1;
+							} else {
+								i = ((i + j) / 2) + 1;
+							}
+						}
+						return v.get(result).bitmap.indexOf('1');
+					} else {
+						if (o instanceof java.lang.Boolean) {
+							int i = 0;
+							int j = (v.size() - 1);
+							int result = 0;
+							while (i <= j) {
+								if (v.get((i + j) / 2).value.equals("true")
+										|| (v.get((i + j) / 2).value.equals("false") && ((String) o).equals("false"))) {
+									result = (i + j) / 2;
+									j = (i + j) / 2 - 1;
+								} else {
+									i = ((i + j) / 2) + 1;
+								}
+							}
+							return v.get(result).bitmap.indexOf('1');
+						}
+					}
+				}
+			}
+		}
+		return -1;
 	}
 
 	public static void main(String[] args) throws DBAppException, IOException, ParseException {
