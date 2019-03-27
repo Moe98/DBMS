@@ -230,7 +230,7 @@ public class Bitmap implements Serializable {
 
 	public static void updateOnDelete(int position, String tableName) throws IOException {
 		String[] paths = new File("bitmaps").list();
-
+		System.out.println(position);
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName)) {
@@ -344,6 +344,9 @@ public class Bitmap implements Serializable {
 			Scanner inputStream = new Scanner(meta);
 			while (inputStream.hasNextLine()) {
 				String s = inputStream.nextLine();
+				String []splitted=s.split(", ");
+				if(!splitted[0].equals(tableName))
+					continue;
 				if (counter == colNumber) {
 					inputStream.close();
 					return s.split(", ")[1];
