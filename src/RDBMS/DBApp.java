@@ -1262,14 +1262,14 @@ public class DBApp {
 			throws ParseException, FileNotFoundException, IOException {
 		String toBeDeleted = bitmapOfColumns(strTableName, htblColNameValue);
 		ArrayList<Integer> pagesToBeDeletedFrom = getPagesOfBitmap(toBeDeleted, strTableName);
-		File file = new File("pages/");
-		String[] paths = sortPaths(file.list());
 		Object tuple[] = new Object[htblColNameValue.size()];
 		tuple = getValueInOrder(strTableName, htblColNameValue);
+		ArrayList<Integer> cumSum=getPages(strTableName);
 		int deleted = 0;
-		int counter = 0;
+		
 		for (int page : pagesToBeDeletedFrom) {
-			Vector<Object> v = getNumberOfTuples("pages/" + paths[page - 1]);
+			int counter = page==1?0:cumSum.get(page-2);
+			Vector<Object> v = getNumberOfTuples("pages/" + strTableName+"_"+page);
 			Object o[];
 			for (int i = 0; i < v.size(); counter++) {
 				o = (Object[]) v.get(i);
@@ -1298,11 +1298,11 @@ public class DBApp {
 					Bitmap.updateOnDelete(counter--, strTableName);
 				} else
 					i++;
-				File deletedFile = new File("pages/" + paths[page - 1]);
+				File deletedFile = new File("pages/" + strTableName+"_"+page);
 				deletedFile.delete();
 				if (v.size() > 0) {
 					try {
-						FileOutputStream fileOut = new FileOutputStream("pages/" + paths[page - 1]);
+						FileOutputStream fileOut = new FileOutputStream("pages/" + strTableName+"_"+page);
 						ObjectOutputStream out = new ObjectOutputStream(fileOut);
 						out.writeObject(v);
 						out.close();
@@ -1350,12 +1350,19 @@ public class DBApp {
 		String[] paths = DBApp.sortPaths(dir.list());
 		ArrayList<Integer> ans = new ArrayList();
 		int sum = 0;
+		int i=1;
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(strTableName)) {
+				int idx=Integer.parseInt(splitted[1]);
+				while(i<idx) {
+					ans.add(sum);
+					i++;
+				}
 				Vector<Object> v = DBApp.getNumberOfTuples("pages/" + path);
 				sum += v.size();
 				ans.add(sum);
+				i++;
 			}
 		}
 		return ans;
@@ -1364,12 +1371,13 @@ public class DBApp {
 	static ArrayList<Integer> getPagesOfBitmap(String bitmap, String tableName) {
 		TreeSet<Integer> set = new TreeSet();
 		ArrayList<Integer> pages = getPages(tableName);
-
+		
+		
 		for (int i = 0, j = 0; i < bitmap.length(); i++) {
 			if (bitmap.charAt(i) == '1') {
 				while (i + 1 > pages.get(j))
 					j++;
-				set.add(j + 1);
+				set.add(j+1);
 			}
 		}
 		ArrayList<Integer> ans = new ArrayList<>();
