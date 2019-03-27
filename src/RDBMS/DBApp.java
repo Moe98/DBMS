@@ -133,9 +133,15 @@ public class DBApp {
 							throw new DBAppException();
 						}
 
-					if (values[2].substring(1).equals("java.util.Date"))
-						if (!(givenValue instanceof Date))
+					if (values[2].substring(1).equals("java.util.Date")) {
+						
+						try {
+							new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH).parse(givenValue.toString());
+						} catch (ParseException e) {
 							throw new DBAppException();
+						}
+						
+					}
 					if (givenValue != null && values[3].substring(1).equals("True"))
 						f = 1;
 				}
@@ -1419,7 +1425,6 @@ public class DBApp {
 		///////////////////////////////////////////////////
 		for (String path : paths) {
 			String[] splitted = path.split("_");
-			System.out.println(Bitmap.getNameofColumn(strTableName, whichClusCol - 1));
 			if (splitted[0].equals(strTableName)
 					&& splitted[1].equals(Bitmap.getNameofColumn(strTableName, whichClusCol - 1))) {
 				String colName = Bitmap.getNameofColumn(strTableName, whichClusCol - 1);

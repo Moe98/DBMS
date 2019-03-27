@@ -7,20 +7,22 @@ public class Test {
 		
 	public static void main(String[] args) throws DBAppException, IOException, ClassNotFoundException, ParseException {
 		String strTableName = "Student";
+		String strTableName2= "People";
 		Hashtable htblColNameType = new Hashtable( );
 		Hashtable htblColNameValue = new Hashtable( );
 //		htblColNameType.put("id", "java.lang.Integer");
 //		htblColNameType.put("name", "java.lang.String");
-//		htblColNameType.put("gpa", "java.lang.Double");
+//		htblColNameType.put("gender", "java.lang.Boolean");
 //		htblColNameType.put("date", "java.lang.Date");
-//		DBApp.createTable( strTableName, "id", htblColNameType );
+//		DBApp.createTable( strTableName2, "date", htblColNameType );
 //		
-		htblColNameValue.put("id", new Integer( 2000));
-//		htblColNameValue.put("name", new String("Zoz" ) );
-//		htblColNameValue.put("gpa", new Double( 0.95 ) );
-//		htblColNameValue.put("date", new Date(1997-1900,12-1,14));
-		DBApp.deleteFromTable(strTableName, htblColNameValue);
-//		DBApp.insertIntoTable(strTableName, htblColNameValue);
+//		htblColNameValue.put("id", new Integer( 1600));
+		htblColNameValue.put("name", new String("Zoz?" ) );
+//		htblColNameValue.put("gender", new Boolean( "false" ));
+		htblColNameValue.put("date", new Date(1997-1900,1-1,19));
+		DBApp.updateTable(strTableName2, "Sun Jan 19 00:00:00 GMT+02:00 1997", htblColNameValue);
+//		DBApp.deleteFromTable(strTableName2, htblColNameValue);
+//		DBApp.insertIntoTable(strTableName2, htblColNameValue);
 //		htblColNameValue.clear( );
 //		htblColNameValue.put("id", new Integer( 1200 ));
 //		htblColNameValue.put("name", new String("Joe" ) );
@@ -42,9 +44,11 @@ public class Test {
 //		htblColNameValue.put("name", new String("Zaky Noor" ) );
 //		htblColNameValue.put("gpa", new Double( 0.88 ) );
 //		DBApp.insertIntoTable( strTableName , htblColNameValue );
-		DBApp.readTables("Student");
-//		DBApp.createBitmapIndex(strTableName, "id");
-		Bitmap.readBitmap(strTableName, "id");
+//		DBApp.readTables("Student");
+		DBApp.readTables(strTableName2);
+//		DBApp.createBitmapIndex(strTableName2, "date");
+//		Bitmap.readBitmap(strTableName, "id");
+		Bitmap.readBitmap(strTableName2, "date");
 	}
 
 }
