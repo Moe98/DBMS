@@ -553,6 +553,9 @@ public class Bitmap implements Serializable {
 				for (int j = location; j < len; j++) {
 					s += "0";
 				}
+				if (tuple[whichIsIndexed.get(i) + 1].equals("empty cell")) {
+					continue;
+				}
 				BitmapPair newBitmap = new BitmapPair(tuple[whichIsIndexed.get(i) + 1] + "", s);
 				insertBitmap(newBitmap, tableName, getNameofColumn(tableName, whichIsIndexed.get(i)));
 			}
