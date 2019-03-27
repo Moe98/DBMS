@@ -691,9 +691,9 @@ public class DBApp {
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
-				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
+				Vector<BitmapPair> v =Bitmap.getBitMapPair("bitmaps/" + paths[i]);
 				for (int j = 0; j < v.size(); j++) {
-					BitmapPair bp = (BitmapPair) v.get(j);
+					BitmapPair bp = v.get(j);
 					if (bp.value.equals(strColumnValue)) {
 						int length = bp.bitmap.length();
 						result = "";
@@ -723,9 +723,9 @@ public class DBApp {
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
-				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
+				Vector<BitmapPair> v =Bitmap.getBitMapPair("bitmaps/" + paths[i]);
 				for (int j = 0; j < v.size(); j++) {
-					BitmapPair bp = (BitmapPair) v.get(j);
+					BitmapPair bp = v.get(j);
 					if (bp.value.equals(strColumnValue)) {
 						int length = bp.bitmap.length();
 						result = "";
@@ -750,9 +750,9 @@ public class DBApp {
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
-				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
+				Vector<BitmapPair> v =Bitmap.getBitMapPair("bitmaps/" + paths[i]);
 				for (int j = 0; j < v.size(); j++) {
-					BitmapPair bp = (BitmapPair) v.get(j);
+					BitmapPair bp =  v.get(j);
 					if (bp.value.equals(strColumnValue)) {
 						int length = bp.bitmap.length();
 						result = "";
@@ -777,9 +777,9 @@ public class DBApp {
 		String[] paths = file.list();
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
-				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
+				Vector<BitmapPair> v =Bitmap.getBitMapPair("bitmaps/" + paths[i]);
 				for (int j = 0; j < v.size(); j++) {
-					BitmapPair bp = (BitmapPair) v.get(j);
+					BitmapPair bp = v.get(j);
 					if (bp.value.equals(strColumnValue)) {
 						int length = bp.bitmap.length();
 						result = "";
