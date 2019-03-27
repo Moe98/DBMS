@@ -614,9 +614,9 @@ public class DBApp {
 		// System.out.println(paths[i]);
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
-				Vector<Object> v = getNumberOfTuples("bitmaps/" + paths[i]);
+				Vector<BitmapPair> v = Bitmap.getBitMapPair("bitmaps/" + paths[i]);
 				for (int j = 0; j < v.size(); j++) {
-					BitmapPair bp = (BitmapPair) v.get(j);
+					BitmapPair bp =v.get(j);
 					if (bp.value.equals(strColumnValue))
 						return bp.bitmap;
 				}
@@ -1546,7 +1546,7 @@ public class DBApp {
 				Vector<BitmapPair> list = Bitmap.getBitMapPair("bitmaps/" + path);
 				for (BitmapPair pair : list) {
 					bitmapPairs.add(new BitmapPair(pair.value, pair.bitmap));
-
+					
 				}
 
 			}
