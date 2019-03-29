@@ -453,10 +453,12 @@ public class DBApp {
 							result = OR(result, ORed.bitmap);
 						}
 						for (int startHere = i + 1; startHere < paths.length; startHere++) {
-							Vector<BitmapPair> above = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
-							for (int allBitmaps = 0; allBitmaps < above.size(); allBitmaps++) {
-								BitmapPair bitmapPair = (BitmapPair) above.get(allBitmaps);
-								result = OR(result, bitmapPair.bitmap);
+							if (paths[startHere].startsWith(startsWithFolderName)) {
+								Vector<BitmapPair> above = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
+								for (int allBitmaps = 0; allBitmaps < above.size(); allBitmaps++) {
+									BitmapPair bitmapPair = (BitmapPair) above.get(allBitmaps);
+									result = OR(result, bitmapPair.bitmap);
+								}
 							}
 						}
 						return result;
@@ -488,10 +490,12 @@ public class DBApp {
 							result = OR(result, ORed.bitmap);
 						}
 						for (int startHere = i + 1; startHere < paths.length; startHere++) {
-							Vector<BitmapPair> above = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
-							for (int allBitmaps = 0; allBitmaps < above.size(); allBitmaps++) {
-								BitmapPair bitmapPair = (BitmapPair) above.get(allBitmaps);
-								result = OR(result, bitmapPair.bitmap);
+							if (paths[startHere].startsWith(startsWithFolderName)) {
+								Vector<BitmapPair> above = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
+								for (int allBitmaps = 0; allBitmaps < above.size(); allBitmaps++) {
+									BitmapPair bitmapPair = (BitmapPair) above.get(allBitmaps);
+									result = OR(result, bitmapPair.bitmap);
+								}
 							}
 						}
 						return result;
@@ -523,10 +527,12 @@ public class DBApp {
 							result = OR(result, ORed.bitmap);
 						}
 						for (int startHere = i - 1; startHere >= 0; startHere--) {
-							Vector<BitmapPair> below = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
-							for (int allBitmaps = 0; allBitmaps < below.size(); allBitmaps++) {
-								BitmapPair bitmapPair = (BitmapPair) below.get(allBitmaps);
-								result = OR(result, bitmapPair.bitmap);
+							if (paths[startHere].startsWith(startsWithFolderName)) {
+								Vector<BitmapPair> below = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
+								for (int allBitmaps = 0; allBitmaps < below.size(); allBitmaps++) {
+									BitmapPair bitmapPair = (BitmapPair) below.get(allBitmaps);
+									result = OR(result, bitmapPair.bitmap);
+								}
 							}
 						}
 						return result;
@@ -546,6 +552,7 @@ public class DBApp {
 		for (int i = 0; i < paths.length; i++) {
 			if (paths[i].startsWith(startsWithFolderName)) {
 				Vector<BitmapPair> v = Bitmap.getBitMapPair("bitmaps/" + paths[i]);
+				// System.out.println(paths[i]);
 				for (int j = 0; j < v.size(); j++) {
 					BitmapPair bp = (BitmapPair) v.get(j);
 					if (bp.value.equals(strColumnValue)) {
@@ -560,10 +567,12 @@ public class DBApp {
 							result = OR(result, ORed.bitmap);
 						}
 						for (int startHere = i - 1; startHere >= 0; startHere--) {
-							Vector<BitmapPair> below = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
-							for (int allBitmaps = 0; allBitmaps < below.size(); allBitmaps++) {
-								BitmapPair bitmapPair = (BitmapPair) below.get(allBitmaps);
-								result = OR(result, bitmapPair.bitmap);
+							if (paths[startHere].startsWith(startsWithFolderName)) {
+								Vector<BitmapPair> below = Bitmap.getBitMapPair("bitmaps/" + paths[startHere]);
+								for (int allBitmaps = 0; allBitmaps < below.size(); allBitmaps++) {
+									BitmapPair bitmapPair = (BitmapPair) below.get(allBitmaps);
+									result = OR(result, bitmapPair.bitmap);
+								}
 							}
 						}
 						return result;
@@ -1699,7 +1708,7 @@ public class DBApp {
 		// Hashtable htblColNameValue = new Hashtable();
 		// // htblColNameValue.put("id", new Integer)
 		// Random random = new Random(100);
-		// for (int i = 0; i < 45; i++) {
+		// for (int i = 0; i < 1000; i++) {
 		// int n = random.nextInt(100) + 1;
 		// int y = random.nextInt(100) + 1;
 		// // double x = random.nextDouble();
@@ -1711,16 +1720,28 @@ public class DBApp {
 		// htblColNameValue.clear();
 		// }
 		// createBitmapIndex(tableName, "id");
-		readTables(tableName);
+		// createBitmapIndex(tableName, "name");
+		// System.out.println(LESSTHANOREQUAL(tableName, "id", "30"));
+		// System.out.println(readBitmap(tableName, "name"));
+		// System.out.println(readBitmap(tableName, "id"));
 		System.out.println("=====================================");
-		SQLTerm[] arrSQLTerms = new SQLTerm[1];
+		readTables(tableName);
+		SQLTerm[] arrSQLTerms = new SQLTerm[2];
 		for (int i = 0; i < arrSQLTerms.length; i++)
 			arrSQLTerms[i] = new SQLTerm();
 		arrSQLTerms[0].strTableName = tableName;
 		arrSQLTerms[0].strColumnName = "id";
 		arrSQLTerms[0].strOperator = "<=";
 		arrSQLTerms[0].objValue = new String("30");
-		String[] strArrOperators = new String[0];
+
+		arrSQLTerms[1].strTableName = tableName;
+		arrSQLTerms[1].strColumnName = "name";
+		arrSQLTerms[1].strOperator = "=";
+		arrSQLTerms[1].objValue = new String("zzz");
+
+		String[] strArrOperators = new String[1];
+		strArrOperators[0] = "AND";
+
 		Iterator iterator = selectFromTable(arrSQLTerms, strArrOperators);
 		while (iterator.hasNext()) {
 			Object[] tuple = (Object[]) iterator.next();
@@ -1728,7 +1749,6 @@ public class DBApp {
 				System.out.print(tuple[i].toString() + " ");
 			System.out.println();
 		}
-
 	}
 
 	static class Pair {
