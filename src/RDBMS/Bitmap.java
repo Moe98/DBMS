@@ -294,7 +294,7 @@ public class Bitmap implements Serializable {
 
 	public static void readBitmap(String tableName, String colName) throws FileNotFoundException {
 		String[] paths = new File("bitmaps").list();
-
+		paths=DBApp.sortPaths(paths);
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName) && splitted[1].equals(colName)) {

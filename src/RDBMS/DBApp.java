@@ -1249,7 +1249,7 @@ public class DBApp {
 	public static ArrayList<BitmapPair> readBitmap(String tableName, String colName) throws FileNotFoundException {
 		String[] paths = new File("bitmaps").list();
 		ArrayList<BitmapPair> bitmapPairs = new ArrayList<>();
-
+		paths=sortPaths(paths);
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName) && splitted[1].equals(colName)) {
