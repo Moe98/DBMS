@@ -560,6 +560,7 @@ public class Bitmap implements Serializable {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public static int getIndex(String tableName, String colName, String value) throws ParseException {
 		String[] paths = new File("bitmaps").list();
+		paths = sortPaths(paths);
 		String type = getType(tableName, colName);
 		int index = 0;
 		for (String path : paths) {
