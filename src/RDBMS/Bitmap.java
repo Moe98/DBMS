@@ -230,7 +230,6 @@ public class Bitmap implements Serializable {
 
 	public static void updateOnDelete(int position, String tableName) throws IOException {
 		String[] paths = new File("bitmaps").list();
-
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName)) {
@@ -295,7 +294,7 @@ public class Bitmap implements Serializable {
 
 	public static void readBitmap(String tableName, String colName) throws FileNotFoundException {
 		String[] paths = new File("bitmaps").list();
-
+		paths=DBApp.sortPaths(paths);
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName) && splitted[1].equals(colName)) {
@@ -344,6 +343,9 @@ public class Bitmap implements Serializable {
 			Scanner inputStream = new Scanner(meta);
 			while (inputStream.hasNextLine()) {
 				String s = inputStream.nextLine();
+				String []splitted=s.split(", ");
+				if(!splitted[0].equals(tableName))
+					continue;
 				if (counter == colNumber) {
 					inputStream.close();
 					return s.split(", ")[1];
@@ -507,12 +509,8 @@ public class Bitmap implements Serializable {
 		ArrayList<Integer> whichIsIndexed = getIndexOfIndexed(tableName);
 		Object[] tuple = new Object[htblColNameValue.size()];
 		tuple = DBApp.getValueInOrder(tableName, htblColNameValue);
-		// int start = pageNumber * DBApp.maxTuplesPerPage, end = start +
-		// DBApp.maxTuplesPerPage;
-		// System.out.println(start + " " + end);
 		String[] paths = new File("bitmaps").list();
 		paths = sortPaths(paths);
-		// int location = pageNumber * DBApp.maxTuplesPerPage + posInPage;
 		boolean caught = false;
 		int len = 0;
 		for (int i = 0; i < whichIsIndexed.size(); i++) {
@@ -550,6 +548,9 @@ public class Bitmap implements Serializable {
 				for (int j = location; j < len; j++) {
 					s += "0";
 				}
+				if (tuple[whichIsIndexed.get(i) + 1].equals("empty cell")) {
+					continue;
+				}
 				BitmapPair newBitmap = new BitmapPair(tuple[whichIsIndexed.get(i) + 1] + "", s);
 				insertBitmap(newBitmap, tableName, getNameofColumn(tableName, whichIsIndexed.get(i)));
 			}
@@ -559,6 +560,7 @@ public class Bitmap implements Serializable {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public static int getIndex(String tableName, String colName, String value) throws ParseException {
 		String[] paths = new File("bitmaps").list();
+		paths = sortPaths(paths);
 		String type = getType(tableName, colName);
 		int index = 0;
 		for (String path : paths) {
