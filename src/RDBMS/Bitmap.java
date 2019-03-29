@@ -230,7 +230,6 @@ public class Bitmap implements Serializable {
 
 	public static void updateOnDelete(int position, String tableName) throws IOException {
 		String[] paths = new File("bitmaps").list();
-		System.out.println(position);
 		for (String path : paths) {
 			String[] splitted = path.split("_");
 			if (splitted[0].equals(tableName)) {
@@ -510,12 +509,8 @@ public class Bitmap implements Serializable {
 		ArrayList<Integer> whichIsIndexed = getIndexOfIndexed(tableName);
 		Object[] tuple = new Object[htblColNameValue.size()];
 		tuple = DBApp.getValueInOrder(tableName, htblColNameValue);
-		// int start = pageNumber * DBApp.maxTuplesPerPage, end = start +
-		// DBApp.maxTuplesPerPage;
-		// System.out.println(start + " " + end);
 		String[] paths = new File("bitmaps").list();
 		paths = sortPaths(paths);
-		// int location = pageNumber * DBApp.maxTuplesPerPage + posInPage;
 		boolean caught = false;
 		int len = 0;
 		for (int i = 0; i < whichIsIndexed.size(); i++) {

@@ -1429,18 +1429,13 @@ public class DBApp {
 					&& splitted[1].equals(Bitmap.getNameofColumn(strTableName, whichClusCol - 1))) {
 				String colName = Bitmap.getNameofColumn(strTableName, whichClusCol - 1);
 				String type = Bitmap.getType(strTableName, colName);
-				System.out.println(path);
 				Vector<BitmapPair> list = Bitmap.getBitMapPair("bitmaps/" + path);
 				BitmapPair pair = list.get(list.size() - 1);
 				String v = pair.value;
 				if (Bitmap.isInteger(v)) {
 					if (new Integer(Integer.parseInt(v)).compareTo((Integer) tuple[whichClusCol]) < 0) {
-						System.out.println(" less ");
 						continue;
 					} else {
-						System.out.println(" binary search ");
-						System.out.println(list);
-						System.out.println(tuple[whichClusCol].toString());
 						int x = binarySearch(list, tuple[whichClusCol]);
 						if (x == -1) {
 							break;
