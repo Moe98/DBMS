@@ -1,3 +1,0 @@
-tableTest, gpa, java.lang.Double, False, False
-tableTest, name, java.lang.String, False, False
-tableTest, id, java.lang.Integer, True, True
