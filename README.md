@@ -1,9 +1,9 @@
-#### Discription
+#### Description 
 Database engine with support for a Bitmap index and the following functionalities
 - creating tables
 - inserting tuples
 - deleting tuples
-- searching in tuples
+- searching for tuples
 - creating a bitmap index
 - searching using bitmap index
 - using SQLTerms
@@ -71,5 +71,5 @@ strarrOperators[0] = "OR";
 Iterator resultSet = selectFromTable(arrSQLTerms , strarrOperators); 
 ```
 
-#### Attribution
-The commits do not reflect the coding amount done by each contributor due to lack of professionalism in using Git at it's time. All the contributors and the collaborators in the repository coded in the project.
+#### Disclaimer
+The commits/LOC do not reflect the contribution done by each member of this repo due to not using Github properly at that time. All the contributors and the collaborators in this repository worked together to deliver the final product.
